@@ -20,11 +20,14 @@ def readData(path):
             with Image.open(f) as img:
                 img_new = transform_pipline(img)
                 # need to check whether it's a color image or a black white image
-
-                img_new = img_new.unsqueeze(0)
-                img_reflection = F.pad(img_new, pad = (40, 40, 40, 40), mode='reflect')
-                img_reflection = img_reflection.reshape(img_reflection.shape[1:])
-                tensor_lst.append(img_reflection)
+                channel = img_new.shape[0]
+                if channel == 3:
+                    img_new = img_new.unsqueeze(0)
+                    img_reflection = F.pad(img_new, pad = (40, 40, 40, 40), mode='reflect')
+                    img_reflection = img_reflection.reshape(img_reflection.shape[1:])
+                    tensor_lst.append(img_reflection)
+                else:
+                    continue
 
     stacked_tensor = torch.stack(tensor_lst)
     stacked_tensor = stacked_tensor.cuda()
