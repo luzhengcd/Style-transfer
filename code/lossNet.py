@@ -9,6 +9,7 @@ import torch.nn as nn
 # relu 1-2, 2-2, 3-3. 4-3
 # The layer for the feature loss:
 # relu 3-3
+
 original_model = models.vgg16(pretrained=True)
 
 class Relu_12(nn.Module):
