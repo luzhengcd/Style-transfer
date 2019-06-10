@@ -10,6 +10,8 @@ import lossCalculation
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-outpath', type = str, default='model')
+args = parser.parse_args()
+
 
 vgg16 = models.vgg16(pretrained=True)
 vgg16.cuda()
@@ -19,9 +21,8 @@ if torch.cuda.is_available():
     torch.cuda.manual_seed(0)
 
 
-PATH_TRAIN_FILE = r'../data/testPic/*'
+PATH_TRAIN_FILE = r'../data/train2014/train2014/*'
 PATH_STYLE = r'../data/style_vangogh.JPG'
-PATH_OUT = r'../model/firstModel.pth'
 
 NUM_EPOCHS = 2
 BATCH_SIZE = 4
@@ -29,8 +30,14 @@ USE_CUDA = True
 NUM_WORKERS = 0
 train_dataset = readData(PATH_TRAIN_FILE)
 
+
+
 train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE,
                                            shuffle=True, num_workers=NUM_WORKERS)
+
+
+
+
 y_s = styleImg(PATH_STYLE).cuda()
 
 model = TransferNet()
@@ -51,4 +58,4 @@ for epoch in range(NUM_EPOCHS):
     train_losses.append(train_loss)
 
 
-torch.save(model.state_dict(), '../model/' + parser.outpath + '.pth')
+torch.save(model.state_dict(), '../model/' + args.outpath + '.pth')
