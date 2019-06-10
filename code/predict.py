@@ -2,7 +2,7 @@ import torch
 import scipy.misc
 import numpy as np
 import matplotlib.pyplot as plt
-
+import transferNet
 
 def imread(path):
     img = scipy.misc.imread(path).astype(np.float)
@@ -14,10 +14,12 @@ def imread(path):
 
 if __name__ == '__main__':
 
-    model = torch.load('../model.pth', map_location='cpu')
+    model_parameters = torch.load('../model.pth', map_location='cpu')
     img_path = ''
-    img = imread(img_path)
+    img = imread(img_path).type('torch.FloatTensor')
+    model = transferNet.TransferNet()
+    model.load_state_dict(model_parameters)
     out = model(img)
-    out = out.view(out.shape[1:][::-1])
+    out = out.reshape(out.shape[1:][::-1])
 
-    plt.imshow(out)
+    plt.imshow(out.data)
