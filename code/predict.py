@@ -21,5 +21,5 @@ if __name__ == '__main__':
     model.load_state_dict(model_parameters)
     out = model(img)
     out = out.reshape(out.shape[1:][::-1])
-
-    plt.imshow(out.data)
+    final = np.array(out.data).astype(np.uint8)
+    plt.imshow(final)

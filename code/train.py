@@ -1,14 +1,15 @@
 
 import torch.optim as optim
 from torch.utils.data import DataLoader
-
+import argparse
 from torchvision import models
 from transferNet import TransferNet
 from utils import *
 from datasets import readData, styleImg
 import lossCalculation
 
-
+parser = argparse.ArgumentParser()
+parser.add_argument('-outpath', type = str, default='model')
 
 vgg16 = models.vgg16(pretrained=True)
 vgg16.cuda()
@@ -50,4 +51,4 @@ for epoch in range(NUM_EPOCHS):
     train_losses.append(train_loss)
 
 
-torch.save(model,PATH_OUT)
+torch.save(model.state_dict(), '../model/' + parser.outpath + '.pth')

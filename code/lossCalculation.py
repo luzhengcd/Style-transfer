@@ -31,7 +31,7 @@ class TotalLoss(torch.nn.Module):
         y_hat_var = torch.autograd.Variable(y_hat)
         y_c_var = torch.autograd.Variable(y_c)
         y_s_var = torch.autograd.Variable(y_s)
-        weight = [0.5, 0.5]
+        weight = [0.2, 0.8]
 
         content = self.contentLoss(y_c_var, y_hat_var)
         style = self.styleLoss(y_s_var, y_hat_var)
@@ -98,9 +98,6 @@ class TotalLoss(torch.nn.Module):
         gram_y = utils.Gram(y_s)
         gram_y_hat = utils.Gram(y_hat)
 
-        # print(gram_y_hat.shape)
-        # print(gram_y.shape)
-
         temp_gram = (gram_y - gram_y_hat) ** 2
         loss = torch.sum(temp_gram)
         return loss
@@ -111,12 +108,20 @@ class TotalLoss(torch.nn.Module):
 
         relu22.to('cuda')
 
-        output33_yc = relu22(y_c_new)
-        output33_hat = relu22(y_hat)
+        output22_yc = relu22(y_c_new)
+        output22_hat = relu22(y_hat)
         # squared, normalized Euclidean distance between feature representations
 
         CHW = torch.prod(torch.tensor(y_c_new.shape[1:]))
-        loss_content = torch.sum((output33_hat - output33_yc) ** 2) / CHW
+        # The shape of the output22_yc is [#pic, ...]
+        hat_flatten = output22_hat.reshape(output22_hat.shape[0], -1)
+        yc_flatten = output22_yc.reshape(output22_yc.shape[0], -1)
+
+        mean_hat = torch.mean(hat_flatten)
+        mean_yc = torch.mean(yc_flatten)
+
+
+        loss_content = 0.5 * torch.sum(((hat_flatten - mean_hat) - (yc_flatten - mean_hat)) ** 2) / \
+                       ((torch.sum((hat_flatten -mean_hat)**2 ) + torch.sum((yc_flatten - mean_yc) ** 2)) * CHW)
 
         return loss_content
-

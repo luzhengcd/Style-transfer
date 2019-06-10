@@ -86,12 +86,8 @@ class TransferNet(nn.Module):
         x = self.conv3(x)
         x = F.relu(self.bn3(x))
         residual1 = x
-        # print('before feeding in residual block', x.shape)
         x = self.block1(x)
-        # print('after feeding in residual block', x.shape)
-        # so x has a shape of 77, while the residual has a shape of 81...
-        # print(x.shape)
-        # print(residual1.shape)
+
         x +=  residual1
         x = x[:,:,2:-2, 2:-2]
         residual2 = x
@@ -118,17 +114,13 @@ class TransferNet(nn.Module):
 
         x = F.relu(self.bn4(x))
         x = x[:, :, 1:, 1:]
-        # print('after first fractional stride layer: ', x.shape)
 
         x = self.conv5(x)
         x = F.relu(self.bn5(x))
         x = x[:, :, 1:, 1:]
-        # print(x.shape)
         x = self.conv6(x)
 
         x = ((F.tanh(x)+1) * 255/2)
         x = x[:, :, 4:-4, 4:-4]
-        # x = x[:, :, 1:, 1:]
-        # print('final', x.shape)
-            # .type(torch.IntTensor)
+
         return x
