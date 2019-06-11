@@ -26,8 +26,8 @@ class TotalLoss(torch.nn.Module):
     # parameters need to be updated???
 
     def forward(self, y_c, y_s, y_hat):
-        y_s = y_s.cuda()
-        y_hat = y_hat.cuda()
+        y_s = y_s.to('cuda' if torch.cuda.is_available() else 'cpu')
+        y_hat = y_hat.to('cuda' if torch.cuda.is_available() else 'cpu')
         y_hat_var = torch.autograd.Variable(y_hat)
         y_c_var = torch.autograd.Variable(y_c)
         y_s_var = torch.autograd.Variable(y_s)
@@ -36,9 +36,15 @@ class TotalLoss(torch.nn.Module):
         content = self.contentLoss(y_c_var, y_hat_var)
         style = self.styleLoss(y_s_var, y_hat_var)
 
-        content = content.cuda()
-        style = style.cuda()
-        total = weight[0] * content + weight[1] * style
+        content = content.to('cuda' if torch.cuda.is_available() else 'cpu')
+        style = style.to('cuda' if torch.cuda.is_available() else 'cpu')
+
+        # add total variation loss
+
+        TV = torch.sum(torch.abs(y_hat_var[:, :, :, :-1] - y_hat_var[:, :, :, 1:])) + \
+             torch.sum(torch.abs(y_hat_var[:, :, :-1, :] - y_hat_var[:, :, 1:, :]))
+
+        total = weight[0] * content + weight[1] * style + 0.000001 * TV
         return total
 
 
@@ -90,7 +96,7 @@ class TotalLoss(torch.nn.Module):
         loss4 = self.help_style(output43_hat, output43_ys)
 
         total_style_loss = loss1 + loss2 + loss3 + loss4
-        total_style_loss = total_style_loss.cuda()
+        total_style_loss = total_style_loss.to('cuda' if torch.cuda.is_available() else 'cpu')
         return total_style_loss
 
     def help_style(self, y_s, y_hat):
@@ -106,7 +112,7 @@ class TotalLoss(torch.nn.Module):
         y_c_new = y_c[:,:,40:-40, 40:-40]
         relu22 = Relu_22()
 
-        relu22.to('cuda')
+        relu22.to('cuda' if torch.cuda.is_available() else 'cpu')
 
         output22_yc = relu22(y_c_new)
         output22_hat = relu22(y_hat)

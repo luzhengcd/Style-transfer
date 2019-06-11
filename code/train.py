@@ -15,14 +15,14 @@ args = parser.parse_args()
 
 
 vgg16 = models.vgg16(pretrained=True)
-vgg16.cuda()
+vgg16.to('cuda' if torch.cuda.is_available() else 'cpu')
 
 torch.manual_seed(0)
 if torch.cuda.is_available():
     torch.cuda.manual_seed(0)
 
 
-PATH_TRAIN_FILE = r'../data/train2014/train2014/*'
+PATH_TRAIN_FILE = r'../data/testPic/*'
 PATH_STYLE = r'../data/style_vangogh.JPG'
 pic_path = glob.glob(PATH_TRAIN_FILE)
 
@@ -33,7 +33,7 @@ BATCH_SIZE = 4
 USE_CUDA = True
 NUM_WORKERS = 0
 
-y_s = styleImg(PATH_STYLE).cuda()
+y_s = styleImg(PATH_STYLE).to('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = TransferNet()
 
@@ -45,8 +45,7 @@ optimizer = optim.Adam(model.parameters(), lr = 0.001)
 model.to(device)
 criterion.to(device)
 
-num_pic_each = 1000
-print('total number of iteration: ', int(NUM_PIC / num_pic_each))
+num_pic_each = 20
 
 for i in range(int(NUM_PIC / num_pic_each)):
 

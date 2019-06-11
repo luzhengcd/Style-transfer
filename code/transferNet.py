@@ -120,7 +120,7 @@ class TransferNet(nn.Module):
         x = x[:, :, 1:, 1:]
         x = self.conv6(x)
 
-        x = ((F.tanh(x)+1) * 255/2)
+        x = F.relu(x)
         x = x[:, :, 4:-4, 4:-4]
 
         return x
