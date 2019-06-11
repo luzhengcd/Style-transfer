@@ -31,7 +31,7 @@ class TotalLoss(torch.nn.Module):
         y_hat_var = torch.autograd.Variable(y_hat)
         y_c_var = torch.autograd.Variable(y_c)
         y_s_var = torch.autograd.Variable(y_s)
-        weight = [0.2, 0.8]
+        weight = [0.7, 0.3]
 
         content = self.contentLoss(y_c_var, y_hat_var)
         style = self.styleLoss(y_s_var, y_hat_var)

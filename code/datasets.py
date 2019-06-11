@@ -8,15 +8,14 @@ from PIL import Image
 import torchvision.transforms as transforms
 import torch.nn.functional as F
 
-def readData(path):
+def readData(path_lst):
 #     The path is where the pictures are, not a specific picture
-    pic_path = glob.glob(path)
     img_size = 256
     tensor_lst = []
     transform_pipline = transforms.Compose([transforms.Resize([img_size, img_size]),
                                             transforms.ToTensor()])
 
-    for path in pic_path:
+    for path in path_lst:
         with open(path, 'r+b') as f:
             with Image.open(f) as img:
                 img_new = transform_pipline(img)
