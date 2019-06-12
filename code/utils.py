@@ -3,10 +3,8 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import time
-import torchvision.transforms as transforms
-import lossCalculation
-from PIL import Image
-import os
+from lossCalculation import contentLoss, styleLoss
+
 
 
 class AverageMeter(object):
@@ -81,7 +79,9 @@ def train(model, device, data_loader,
 
         y_hat = model(input)
 
-        loss = criterion(y_c, y_s, y_hat)
+        loss_content = contentLoss(y_c, y_hat, criterion)
+        loss_style = styleLoss(y_s, y_hat, criterion)
+        loss = 0.5 * loss_content + 0.5 * loss_style
         loss.to(device)
         loss.backward()
         optimizer.step()

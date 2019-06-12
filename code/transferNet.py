@@ -9,72 +9,72 @@ class TransferNet(nn.Module):
 
         self.conv1 = nn.Conv2d(in_channels = 3, out_channels = 32,
                                kernel_size= 9,stride = 1, padding=4)
-        self.bn1 = nn.BatchNorm2d(32)
+        self.bn1 = nn.InstanceNorm2d(32)
 
         self.conv2 = nn.Conv2d(in_channels=32, out_channels=64,
                                kernel_size=3, stride=2, padding=1)
-        self.bn2 = nn.BatchNorm2d(64)
+        self.bn2 = nn.InstanceNorm2d(64)
         self.conv3 = nn.Conv2d(in_channels= 64, out_channels=128,
                                kernel_size=3, stride=2, padding=1)
-        self.bn3 = nn.BatchNorm2d(128)
+        self.bn3 = nn.InstanceNorm2d(128)
         #   5 Residual blocks would be here
 
         self.block1 = nn.Sequential(
             nn.Conv2d(in_channels=128, out_channels=128,
                       kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
+            nn.InstanceNorm2d(128),
             nn.ReLU(),
             nn.Conv2d(in_channels=128, out_channels=128,
                       kernel_size=3, padding=1),
-            nn.BatchNorm2d(128)
+            nn.InstanceNorm2d(128)
         )
 
         self.block2 = nn.Sequential(
             nn.Conv2d(in_channels=128, out_channels=128,
                       kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
+            nn.InstanceNorm2d(128),
             nn.ReLU(),
             nn.Conv2d(in_channels=128, out_channels=128,
                       kernel_size=3, padding = 1),
-            nn.BatchNorm2d(128)
+            nn.InstanceNorm2d(128)
         )
 
         self.block3 = nn.Sequential(
             nn.Conv2d(in_channels=128, out_channels=128,
                       kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
+            nn.InstanceNorm2d(128),
             nn.ReLU(),
             nn.Conv2d(in_channels=128, out_channels=128,
                       kernel_size=3, padding=1),
-            nn.BatchNorm2d(128)
+            nn.InstanceNorm2d(128)
         )
 
         self.block4 = nn.Sequential(
             nn.Conv2d(in_channels=128, out_channels=128,
                       kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
+            nn.InstanceNorm2d(128),
             nn.ReLU(),
             nn.Conv2d(in_channels=128, out_channels=128,
                       kernel_size=3, padding=1),
-            nn.BatchNorm2d(128)
+            nn.InstanceNorm2d(128)
         )
 
         self.block5 = nn.Sequential(
             nn.Conv2d(in_channels=128, out_channels=128,
                       kernel_size=3, padding=1),
-            nn.BatchNorm2d(128),
+            nn.InstanceNorm2d(128),
             nn.ReLU(),
             nn.Conv2d(in_channels=128, out_channels=128,
                       kernel_size=3, padding=1),
-            nn.BatchNorm2d(128)
+            nn.InstanceNorm2d(128)
         )
 
         self.conv4 = nn.ConvTranspose2d(in_channels=128, out_channels=64,
                                kernel_size=3, stride=2)
-        self.bn4 = nn.BatchNorm2d(64)
+        self.bn4 = nn.InstanceNorm2d(64)
         self.conv5 = nn.ConvTranspose2d(in_channels=64, out_channels=32,
                                kernel_size=3, stride=2)
-        self.bn5 = nn.BatchNorm2d(32)
+        self.bn5 = nn.InstanceNorm2d(32)
         self.conv6 = nn.ConvTranspose2d(in_channels=32, out_channels=3,
                                kernel_size=9, stride=1)
 

@@ -2,9 +2,11 @@
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import argparse
+
 from torchvision import models
 from transferNet import TransferNet
 from utils import *
+import torch.nn as nn
 from datasets import readData, styleImg
 import lossCalculation
 import glob
@@ -22,7 +24,7 @@ if torch.cuda.is_available():
     torch.cuda.manual_seed(0)
 
 
-PATH_TRAIN_FILE = r'../data/testPic/*'
+PATH_TRAIN_FILE = r'../data/train2014/train2014/*'
 PATH_STYLE = r'../data/style_vangogh.JPG'
 pic_path = glob.glob(PATH_TRAIN_FILE)
 
@@ -37,7 +39,9 @@ y_s = styleImg(PATH_STYLE).to('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = TransferNet()
 
-criterion = lossCalculation.TotalLoss()
+criterion = nn.MSELoss()
+
+# criterion = lossCalculation.TotalLoss()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 optimizer = optim.Adam(model.parameters(), lr = 0.001)
@@ -45,7 +49,7 @@ optimizer = optim.Adam(model.parameters(), lr = 0.001)
 model.to(device)
 criterion.to(device)
 
-num_pic_each = 20
+num_pic_each = 1000
 
 for i in range(int(NUM_PIC / num_pic_each)):
 
@@ -65,7 +69,7 @@ for i in range(int(NUM_PIC / num_pic_each)):
     for epoch in range(NUM_EPOCHS):
         print(epoch)
         train_loss = train(model, device, train_loader, optimizer, NUM_EPOCHS, y_s, criterion)
-        # train_losses.append(train_loss)
+
 
     print( '===========[{0}/{1}]============\t'
            .format(i, int(NUM_PIC/num_pic_each)))
