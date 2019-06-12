@@ -28,6 +28,7 @@ PATH_TRAIN_FILE = r'../data/train2014/train2014/*'
 PATH_STYLE = r'../data/style_vangogh.JPG'
 pic_path = glob.glob(PATH_TRAIN_FILE)
 
+pic_path = pic_path[:2000]
 NUM_PIC = len(pic_path)
 
 NUM_EPOCHS = 2

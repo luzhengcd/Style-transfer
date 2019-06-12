@@ -7,6 +7,17 @@ import torchvision.transforms as transforms
 from PIL import Image
 
 
+
+def recover_image(img):
+    return (
+        (
+            img *
+            np.array([0.229, 0.224, 0.225]).reshape((1, 3, 1, 1)) +
+            np.array([0.485, 0.456, 0.406]).reshape((1, 3, 1, 1))
+        ).transpose(0, 2, 3, 1) *
+        255.
+    ).clip(0, 255).astype(np.uint8)
+
 #
 # def imread(path):
 #
@@ -41,6 +52,10 @@ if __name__ == '__main__':
     model = transferNet.TransferNet()
     model.load_state_dict(model_parameters)
     out = model(img)
-    out = out.reshape(out.shape[1:][::-1])
-    final = np.array(out.data).astype(np.uint8)
-    plt.imshow(final)
+
+    new_out = recover_image(out.data.cup().numpy())[0]
+    Image.fromarray(new_out)
+    #
+    # out = new_out.reshape(new_out.shape[1][::-1])
+    # final = np.array(out.data).astype(np.uint8)
+    # plt.imshow(final)
