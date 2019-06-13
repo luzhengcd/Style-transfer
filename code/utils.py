@@ -61,6 +61,8 @@ def train(model, device, data_loader,
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
+    loss_content_track = AverageMeter()
+    loss_style_track = AverageMeter()
 
     model.train()
 
@@ -80,8 +82,8 @@ def train(model, device, data_loader,
         y_hat = model(input)
 
         loss_content = contentLoss(y_c, y_hat, criterion)
-        loss_style = styleLoss(y_s, y_hat, criterion)
-        loss = 0.5 * loss_content + 0.5 * loss_style
+        loss_style = 10000.0 * styleLoss(y_s, y_hat, criterion)
+        loss = 1 * loss_content +  loss_style
         loss.to(device)
         loss.backward()
         optimizer.step()
@@ -90,12 +92,17 @@ def train(model, device, data_loader,
         end = time.time()
 
         losses.update(loss.item())
+        loss_content_track.update(loss_content)
+        loss_style_track.update(loss_style)
 
         print('Epoch: [{0}][{1}/{2}]\t'
               'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
               'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-              'Loss {loss.val:.4f} ({loss.avg:.4f})'
-              .format(epoch, i, len(data_loader), batch_time=batch_time, data_time=data_time, loss=losses))
+              'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+              'Content loss {closs.val:.4f} ({closs.avg:.4f})\t'
+              'Style loss {sloss.val:.4f} ({sloss.avg:.4f})'
+              .format(epoch, i, len(data_loader), batch_time=batch_time, data_time=data_time, loss=losses,
+                      closs = loss_content_track, sloss = loss_style_track))
 
     return losses.avg
 

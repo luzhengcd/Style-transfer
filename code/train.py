@@ -13,6 +13,7 @@ import glob
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-outpath', type = str, default='model')
+parser.add_argument('-style', type = str, default= 'mosaic')
 args = parser.parse_args()
 
 
@@ -25,10 +26,10 @@ if torch.cuda.is_available():
 
 
 PATH_TRAIN_FILE = r'../data/train2014/train2014/*'
-PATH_STYLE = r'../data/style_vangogh.JPG'
+PATH_STYLE = r'../data/styleImg/'+ args.style +'.jpg'
 pic_path = glob.glob(PATH_TRAIN_FILE)
-
 pic_path = pic_path[:2000]
+
 NUM_PIC = len(pic_path)
 
 NUM_EPOCHS = 2

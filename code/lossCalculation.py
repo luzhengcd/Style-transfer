@@ -173,11 +173,12 @@ def styleLoss(y_s, y_hat, criterion):
 
     #   calculate the gram matrix for each layer
     #   right now, we assume the outputs have a shape of [3,.., ..]
-
-    loss1 = criterion(output12_hat, output12_ys)
-    loss2 = criterion(output22_hat, output22_ys)
-    loss3 = criterion(output33_hat, output33_ys)
-    loss4 = criterion(output43_hat, output43_ys)
+    # print(utils.Gram(output12_ys))
+    # print(utils.Gram(output12_hat))
+    loss1 = criterion(utils.Gram(output12_hat), utils.Gram(output12_ys))
+    loss2 = criterion(utils.Gram(output22_hat), utils.Gram(output22_ys))
+    loss3 = criterion(utils.Gram(output33_hat), utils.Gram(output33_ys))
+    loss4 = criterion(utils.Gram(output43_hat), utils.Gram(output43_ys))
 
     total_style_loss = loss1 + loss2 + loss3 + loss4
     total_style_loss = total_style_loss.to('cuda' if torch.cuda.is_available() else 'cpu')
