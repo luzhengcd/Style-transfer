@@ -56,7 +56,7 @@ def Gram(X):
 
 
 def train(model, device, data_loader,
-          optimizer, epoch, y_s, criterion):
+          optimizer, epoch, y_s, criterion, cWeight, sWeight):
 
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -82,8 +82,8 @@ def train(model, device, data_loader,
         y_hat = model(input)
 
         loss_content = contentLoss(y_c, y_hat, criterion)
-        loss_style = 10000.0 * styleLoss(y_s, y_hat, criterion)
-        loss = 1 * loss_content +  loss_style
+        loss_style = sWeight * styleLoss(y_s, y_hat, criterion)
+        loss = cWeight * loss_content +  loss_style
         loss.to(device)
         loss.backward()
         optimizer.step()

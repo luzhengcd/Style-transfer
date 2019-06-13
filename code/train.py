@@ -14,6 +14,9 @@ import glob
 parser = argparse.ArgumentParser()
 parser.add_argument('-outpath', type = str, default='model')
 parser.add_argument('-style', type = str, default= 'mosaic')
+parser.add_argument('-cWeight', type = float, default=1)
+parser.add_argument('-sWeight', type = float, default= 10000)
+parser.add_argument('-trainSize', type = int, default=2000)
 args = parser.parse_args()
 
 
@@ -28,7 +31,7 @@ if torch.cuda.is_available():
 PATH_TRAIN_FILE = r'../data/train2014/train2014/*'
 PATH_STYLE = r'../data/styleImg/'+ args.style +'.jpg'
 pic_path = glob.glob(PATH_TRAIN_FILE)
-pic_path = pic_path[:2000]
+pic_path = pic_path[:args.trainSize]
 
 NUM_PIC = len(pic_path)
 
@@ -70,8 +73,8 @@ for i in range(int(NUM_PIC / num_pic_each)):
 
     for epoch in range(NUM_EPOCHS):
         print(epoch)
-        train_loss = train(model, device, train_loader, optimizer, NUM_EPOCHS, y_s, criterion)
-
+        train_loss = train(model, device, train_loader, optimizer, NUM_EPOCHS, y_s,
+                           criterion, args.cWeight, args.sWeight)
 
     print( '===========[{0}/{1}]============\t'
            .format(i, int(NUM_PIC/num_pic_each)))

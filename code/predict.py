@@ -18,16 +18,7 @@ def recover_image(img):
         255.
     ).clip(0, 255).astype(np.uint8)
 
-#
-# def imread(path):
-#
-#
-#
-#     img = scipy.misc.imread(path).astype(np.float)
-#     img_tensor = torch.tensor(img)
-#     img_tensor = img_tensor.reshape(img_tensor.shape[::-1])
-#     img_tensor = img_tensor.reshape((1, *img_tensor.shape))
-#     return img_tensor #returns RGB format
+
 
 def imread(path):
 
@@ -55,7 +46,4 @@ if __name__ == '__main__':
 
     new_out = recover_image(out.data.cup().numpy())[0]
     Image.fromarray(new_out)
-    #
-    # out = new_out.reshape(new_out.shape[1][::-1])
-    # final = np.array(out.data).astype(np.uint8)
-    # plt.imshow(final)
+
