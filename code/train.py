@@ -28,7 +28,7 @@ if torch.cuda.is_available():
     torch.cuda.manual_seed(0)
 
 
-PATH_TRAIN_FILE = r'../data/train2014/train2014/*'
+PATH_TRAIN_FILE = r'../data/train2014/*'
 PATH_STYLE = r'../data/styleImg/'+ args.style +'.jpg'
 pic_path = glob.glob(PATH_TRAIN_FILE)
 pic_path = pic_path[:args.trainSize]

@@ -9,6 +9,8 @@ class TransferNet(nn.Module):
 
         self.conv1 = nn.Conv2d(in_channels = 3, out_channels = 32,
                                kernel_size= 9,stride = 1, padding=4)
+
+
         self.bn1 = nn.InstanceNorm2d(32)
 
         self.conv2 = nn.Conv2d(in_channels=32, out_channels=64,
@@ -79,15 +81,19 @@ class TransferNet(nn.Module):
                                kernel_size=9, stride=1)
 
     def forward(self, x):
+        # print('original: ', x.shape)
         x = self.conv1(x)
         x = F.relu(self.bn1(x))
+        # print('after first layer: ', x.shape)
         x = self.conv2(x)
         x = F.relu(self.bn2(x))
+        # print('after second layer: ', x.shape)
         x = self.conv3(x)
         x = F.relu(self.bn3(x))
+        # print('after third layer: ', x.shape)
         residual1 = x
         x = self.block1(x)
-
+        # print('')
         x +=  residual1
         x = x[:,:,2:-2, 2:-2]
         residual2 = x
