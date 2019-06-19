@@ -38,11 +38,10 @@ def imread(path):
     return img_new
 
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 def predict_pic(model_path, img_path):
-
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model_parameters = torch.load(model_path, map_location= device)
     img = imread(img_path).type('torch.FloatTensor')
 
@@ -59,7 +58,7 @@ def predict_pic(model_path, img_path):
 
 
 def predict_video():
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model_parameters = torch.load('../model/model_vangogh4.pth', )
     path = '../data/video/2019_NCL_Brand_Essence_Good_to_be_Free.mp4'
@@ -67,29 +66,33 @@ def predict_video():
     model.load_state_dict(model_parameters)
 
     model.to(device)
-    videodata = io.vread(path) / 255.
-    device = ''
-    processed_video = torch.Tensor(videodata.transpose(0, 3, 1, 2)).to(device)
-
+    videodata = io.vread(path, num_frames=30) / 255.
+    processed_video = torch.Tensor(videodata.transpose(0, 3, 1, 2))
+    # processed_video.to(device)
     num_frame = processed_video.shape[0]
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
 
     frame_lst = []
+
     for i in range(num_frame):
         #     normalize the picture before feeding into model
         print(i)
         current_frame = processed_video[i]
+        # current_frame.to(device)
+
         normalized = normalize(current_frame, mean, std)
-        new_frame = normalized.reshape((1, *normalized.shape))
+        new_frame = normalized.reshape((1, *normalized.shape)).to(device)
+        # new_frame.cuda()
         out = model(new_frame)
-        new_out = recover_image(out.data.numpy())[0]
-        new_out = new_out.transpose(2, 0, 1)
+        new_out = recover_image(out.data.cpu().numpy())[0]
+        # new_out = new_out.transpose(2, 0, 1)
         new_out = new_out.reshape((1, *new_out.shape))
         frame_lst.append(new_out)
-        
+
     out_video = np.concatenate(frame_lst)
-    io.vwrite("outputvideo.mp4", out_video)
+    print(out_video.shape)
+    io.vwrite("../outputImage/outputvideo_new.mp4", out_video, outputdict={'-pix_fmt':'yuv420p'})
 
 
 if __name__ == '__main__':
