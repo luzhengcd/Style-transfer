@@ -57,6 +57,7 @@ def predict_pic(model_path, img_path):
 
 def predict_video():
     # git checkout test change
+    # test again
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model_parameters = torch.load('../model/model_vangogh4.pth', )
     path = '../data/video/2019_NCL_Brand_Essence_Good_to_be_Free.mp4'
