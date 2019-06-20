@@ -3,11 +3,14 @@ import numpy as np
 import transferNet
 import torchvision.transforms as transforms
 from PIL import Image
-
-import skvideo.io as io
 import cv2
 from torchvision.transforms.functional import normalize
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('-fourcc', type = str, default='mp4v')
+
+args = parser.parse_args()
 
 def recover_image(img):
     return (
@@ -64,11 +67,13 @@ def predict_video():
 
     model.to(device)
     cap = cv2.VideoCapture(path)
-
+    fourcc = cv2.VideoWriter_fourcc(*args.fourcc)
+    out_writer = cv2.VideoWriter("../outputImage/outputvideo_new.avi",
+                          fourcc, 24.0, (640, 480))
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
 
-    frame_lst = []
+    # frame_lst = []
     count = 0
 
     while (True):
@@ -76,24 +81,27 @@ def predict_video():
         count = count + 1
         print(count)
 
-        if ret:
+        if ret and count <= 30:
             current_frame = torch.Tensor(frame.transpose(2, 0, 1)) / 255.
             normalized = normalize(current_frame, mean, std)
+            torch.cuda.empty_cache()
             new_frame = normalized.reshape((1, *normalized.shape)).to(device)
 
             out = model(new_frame)
             new_out = recover_image(out.data.cpu().numpy())[0]
-            new_out = new_out.reshape((1, *new_out.shape))
-            frame_lst.append(new_out)
-
+            out_writer.write(new_out)
+            # new_out = new_out.reshape((1, *new_out.shape))
+            # frame_lst.append(new_out)
         else:
             break
+    cap.release()
+    out_writer.release()
+    cv2.destroyAllWindows()
 
 
-
-    out_video = np.concatenate(frame_lst)
-    print(out_video.shape)
-    io.vwrite("../outputImage/outputvideo_new.mp4", out_video, outputdict={'-pix_fmt':'yuv420p'})
+    # out_video = np.concatenate(frame_lst)
+    # print(out_video.shape)
+    # io.vwrite("../outputImage/outputvideo_new.mp4", out_video, outputdict={'-pix_fmt':'yuv420p'})
 
 
 if __name__ == '__main__':
