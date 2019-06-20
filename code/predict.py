@@ -1,13 +1,11 @@
 import torch
-import scipy.misc
 import numpy as np
-import matplotlib.pyplot as plt
 import transferNet
 import torchvision.transforms as transforms
 from PIL import Image
-import os
-import skvideo
+
 import skvideo.io as io
+import cv2
 from torchvision.transforms.functional import normalize
 
 
@@ -59,36 +57,39 @@ def predict_pic(model_path, img_path):
 
 def predict_video():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
     model_parameters = torch.load('../model/model_vangogh4.pth', )
     path = '../data/video/2019_NCL_Brand_Essence_Good_to_be_Free.mp4'
     model = transferNet.TransferNet()
     model.load_state_dict(model_parameters)
 
     model.to(device)
-    videodata = io.vread(path, num_frames=30) / 255.
-    processed_video = torch.Tensor(videodata.transpose(0, 3, 1, 2))
-    # processed_video.to(device)
-    num_frame = processed_video.shape[0]
+    cap = cv2.VideoCapture(path)
+
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
 
     frame_lst = []
+    count = 0
 
-    for i in range(num_frame):
-        #     normalize the picture before feeding into model
-        print(i)
-        current_frame = processed_video[i]
-        # current_frame.to(device)
+    while (True):
+        ret, frame = cap.read()
+        count = count + 1
+        print(count)
 
-        normalized = normalize(current_frame, mean, std)
-        new_frame = normalized.reshape((1, *normalized.shape)).to(device)
-        # new_frame.cuda()
-        out = model(new_frame)
-        new_out = recover_image(out.data.cpu().numpy())[0]
-        # new_out = new_out.transpose(2, 0, 1)
-        new_out = new_out.reshape((1, *new_out.shape))
-        frame_lst.append(new_out)
+        if ret:
+            current_frame = torch.Tensor(frame.transpose(2, 0, 1)) / 255.
+            normalized = normalize(current_frame, mean, std)
+            new_frame = normalized.reshape((1, *normalized.shape)).to(device)
+
+            out = model(new_frame)
+            new_out = recover_image(out.data.cpu().numpy())[0]
+            new_out = new_out.reshape((1, *new_out.shape))
+            frame_lst.append(new_out)
+
+        else:
+            break
+
+
 
     out_video = np.concatenate(frame_lst)
     print(out_video.shape)
