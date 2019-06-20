@@ -56,6 +56,7 @@ def predict_pic(model_path, img_path):
 
 
 def predict_video():
+    # git checkout test change
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model_parameters = torch.load('../model/model_vangogh4.pth', )
     path = '../data/video/2019_NCL_Brand_Essence_Good_to_be_Free.mp4'
@@ -88,7 +89,6 @@ def predict_video():
 
         else:
             break
-
 
 
     out_video = np.concatenate(frame_lst)
