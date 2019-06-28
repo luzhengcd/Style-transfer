@@ -77,8 +77,8 @@ class TransferNet(nn.Module):
         self.conv5 = nn.ConvTranspose2d(in_channels=64, out_channels=32,
                                kernel_size=3, stride=2)
         self.bn5 = nn.InstanceNorm2d(32)
-        self.conv6 = nn.ConvTranspose2d(in_channels=32, out_channels=3,
-                               kernel_size=9, stride=1)
+        self.conv6 = nn.Conv2d(in_channels=32, out_channels=3,
+                               kernel_size=9, stride=1, padding=4)
 
     def forward(self, x):
         # print('original: ', x.shape)
@@ -93,15 +93,21 @@ class TransferNet(nn.Module):
         # print('after third layer: ', x.shape)
         residual1 = x
         x = self.block1(x)
-        # print('')
+        # print('before first block: ', x.shape)
         x +=  residual1
         x = x[:,:,2:-2, 2:-2]
+
         residual2 = x
+        # print('before second block: ', x.shape)
+
         x = self.block2(x)
         x += residual2
         x = x[:, :, 2:-2, 2:-2]
         residual3 = x
+        # print('before third block: ', x.shape)
+
         x = self.block3(x)
+
         x += residual3
         x = x[:, :, 2:-2, 2:-2]
 
@@ -115,18 +121,23 @@ class TransferNet(nn.Module):
         x = self.block5(x)
         x += residual5
         x = x[:,:, 2:-2, 2:-2]
+        # print('after all residual block: ', x.shape)
 
         x = self.conv4(x)
-
         x = F.relu(self.bn4(x))
+
         x = x[:, :, 1:, 1:]
+        # print('after first deconv layer: ', x.shape)
+
 
         x = self.conv5(x)
         x = F.relu(self.bn5(x))
-        x = x[:, :, 1:, 1:]
-        x = self.conv6(x)
+        x = x[:, :, :-1, :-1]
+        # print('after second deconv layer: ', x.shape)
 
+        x = self.conv6(x)
+        # print('after third deconv layer: ', x.shape)
         x = F.tanh(x)
-        x = x[:, :, 4:-4, 4:-4]
+        # x = x[:, :, 4:-4, 4:-4]
 
         return x
