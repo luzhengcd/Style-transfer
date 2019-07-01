@@ -81,10 +81,10 @@ class TransferNet(nn.Module):
                                kernel_size=9, stride=1, padding=4)
 
     def forward(self, x):
-        print('original: ', x.shape)
+        # print('original: ', x.shape)
         x = self.conv1(x)
         x = F.relu(self.bn1(x))
-        print('after first layer: ', x.shape)
+        # print('after first layer: ', x.shape)
         x = self.conv2(x)
         x = F.relu(self.bn2(x))
         # print('after second layer: ', x.shape)

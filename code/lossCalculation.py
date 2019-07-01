@@ -99,3 +99,5 @@ def contentLoss(y_c, y_hat, criterion):
     #                ((torch.sum((hat_flatten -mean_hat)**2 ) + torch.sum((yc_flatten - mean_yc) ** 2)) * CHW)
     loss_content = criterion(hat_flatten, yc_flatten)
     return loss_content
+
+# def temporalLoss():
