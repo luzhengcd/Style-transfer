@@ -122,7 +122,7 @@ class TransferNet(nn.Module):
         x += residual5
         x = x[:,:, 2:-2, 2:-2]
         # print('after all residual block: ', x.shape)
-
+        feature = x
         x = self.conv4(x)
         x = F.relu(self.bn4(x))
 
@@ -137,8 +137,7 @@ class TransferNet(nn.Module):
 
         x = self.conv6(x)
         # print('after third deconv layer: ', x.shape)
-# >>>>>>> f10d11edd08627046cfdb6db3acf1f836c5a49b5
-        x = F.tanh(x)
+        final = F.tanh(x)
         # x = x[:, :, 4:-4, 4:-4]
 
-        return x
+        return feature, final

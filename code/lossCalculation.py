@@ -4,6 +4,7 @@ from lossNet import *
 import utils
 import numpy as np
 from torch.autograd import Variable
+from opticalFlow import *
 
 """
 To calculate the loss, the following steps need to be implemented:
@@ -100,4 +101,28 @@ def contentLoss(y_c, y_hat, criterion):
     loss_content = criterion(hat_flatten, yc_flatten)
     return loss_content
 
-# def temporalLoss():
+def temporalF(f_current, f_pre, flow, criterion):
+
+    f_warp = warp_flow(f_pre, flow)
+
+    return criterion(f_current, f_warp)
+
+
+def temporalO(O_current, O_pre, I_current, I_pre, criterion, flow):
+
+    # For BGR image, it returns an array of Blue, Green, Red values. (B, G, R)
+    O_warp = warp_flow(O_pre, flow)
+    I_warp = warp_flow(I_pre, flow)
+
+    temp1 = O_current -  O_warp
+    temp2 = I_current - I_warp
+
+    # 3 channels:
+    b = temp2[:,:,0]
+    g = temp2[:,:,1]
+    r = temp2[:,:,2]
+    # based on the paper, calculate the relative luminance
+
+    Y = 0.2126 * r + 0.7152*g + 0.0722*b
+
+    return criterion(temp1, Y)

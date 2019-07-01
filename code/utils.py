@@ -69,6 +69,7 @@ def train(model, device, data_loader,
     end = time.time()
 
     for i, input in enumerate(data_loader):
+
         data_time.update((time.time() - end))
 
         y_org = input[0]
@@ -79,7 +80,7 @@ def train(model, device, data_loader,
         optimizer.zero_grad()
 
 
-        y_hat = model(input)
+        feature, y_hat = model(input)
 
         loss_content = contentLoss(y_c, y_hat, criterion)
         loss_style = sWeight * styleLoss(y_s, y_hat, criterion)
