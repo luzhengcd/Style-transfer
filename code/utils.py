@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import time
-from lossCalculation import contentLoss, styleLoss
+from lossCalculation import *
 
 
 
@@ -23,9 +23,6 @@ class AverageMeter(object):
         self.sum  += val * n
         self.count += n
         self.avg = self.sum / self.count
-
-
-
 
 def imsave(path, img):
     img = np.clip(img, 0, 255).astype(np.uint8)
@@ -56,7 +53,7 @@ def Gram(X):
 
 
 def train(model, device, data_loader,
-          optimizer, epoch, y_s, criterion, cWeight, sWeight):
+          optimizer, epoch, y_s, criterion, cWeight, sWeight, fWeight, oWeight):
 
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -68,23 +65,44 @@ def train(model, device, data_loader,
 
     end = time.time()
 
-    for i, input in enumerate(data_loader):
+
+    data_iterator = enumerate(data_loader)
+
+    pre = next(data_iterator)[1][0]
+
+
+    for i, input in data_iterator:
+
+        # this is the input frame!!!!
 
         data_time.update((time.time() - end))
 
         y_org = input[0]
         y_c = y_org
 
-        input = y_org.to(device)
+        current_input = y_org.to(device)
+        pre_input = pre.to(device)
 
         optimizer.zero_grad()
 
 
-        feature, y_hat = model(input)
+        feature_current, y_hat_current = model(current_input)
+        feature_pre, y_hat_pre = model(pre_input)
 
-        loss_content = contentLoss(y_c, y_hat, criterion)
-        loss_style = sWeight * styleLoss(y_s, y_hat, criterion)
-        loss = cWeight * loss_content + loss_style
+
+        loss_content = contentLoss(y_c, y_hat_current, criterion)
+        loss_style = sWeight * styleLoss(y_s, y_hat_current, criterion)
+
+        # def temporalF(f_current, f_pre, flow, criterion):
+        # def temporalO(O_current, O_pre, I_current, I_pre, criterion, flow):
+
+        flow = warp_flow(pre_input, current_input)
+
+        loss_temporalF = temporalF(feature_current, feature_pre, flow)
+        loss_temporalO = temporalO(y_hat_current, y_hat_pre, current_input, pre_input, criterion, flow)
+
+
+        loss = cWeight * loss_content + loss_style + fWeight * loss_temporalF + oWeight * loss_temporalO
         loss.to(device)
         loss.backward()
         optimizer.step()
