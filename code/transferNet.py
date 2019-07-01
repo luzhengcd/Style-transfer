@@ -136,7 +136,8 @@ class TransferNet(nn.Module):
         # print('after second deconv layer: ', x.shape)
 
         x = self.conv6(x)
-        print('after third deconv layer: ', x.shape)
+        # print('after third deconv layer: ', x.shape)
+# >>>>>>> f10d11edd08627046cfdb6db3acf1f836c5a49b5
         x = F.tanh(x)
         # x = x[:, :, 4:-4, 4:-4]
 
