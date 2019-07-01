@@ -88,6 +88,8 @@ def train(model, device, data_loader,
 
         feature_current, y_hat_current = model(current_input)
         feature_pre, y_hat_pre = model(pre_input)
+        
+        pre = y_c
 
 
         loss_content = contentLoss(y_c, y_hat_current, criterion)

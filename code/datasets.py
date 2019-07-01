@@ -20,12 +20,9 @@ def readData(path_lst):
             with Image.open(f) as img:
                 # The input tensor has to be (C, H, W) in format
                 img_new = transform_pipline(img)
-                # print(img_new.shape)
                 # need to check whether it's a color image or a black white image
-                # print(img_new.shape)
                 channel = img_new.shape[0]
                 if channel == 3:
-
                     img_new = transforms.Normalize(mean = [0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img_new)
                     img_new = img_new.unsqueeze(0)
                     img_reflection = F.pad(img_new, pad = (40, 40, 40, 40), mode='reflect')
@@ -54,26 +51,19 @@ def crop_array(h, w, img_arr):
 
 def readVideo(path):
     # path is the directory of the video
-
     img_width = 640
     img_height = 360
     tensor_lst = []
     cap = cv2.VideoCapture(path)
-
-    # transform_pipline = transforms.Compose([transforms.Resize([img_height, img_width]),
-    #                                         transforms.ToTensor()])
 
     while (True):
         ret, frame = cap.read()
 
         if ret:
 
-        # with open(path, 'r+b') as f:
-        #     with Image.open(f) as img:
 
             img_new = torch.Tensor( crop_array(img_height, img_width, frame) ) / 255.0
-            # print(img_new.shape)
-            # need to check whether it's a color image or a black white image
+
             img_new = img_new.reshape(3, img_height, img_width)
 
             img_new = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img_new)
@@ -81,6 +71,8 @@ def readVideo(path):
             img_reflection = F.pad(img_new, pad=(40, 40, 40, 40), mode='reflect')
             img_reflection = img_reflection.reshape(img_reflection.shape[1:])
             tensor_lst.append(img_reflection)
+        else:
+            break
 
     cv2.destroyAllWindows()
     cap.release()
@@ -89,8 +81,6 @@ def readVideo(path):
     dataset = TensorDataset(stacked_tensor)
 
     return dataset
-
-    # pass
 
 
 def styleImg(path):
