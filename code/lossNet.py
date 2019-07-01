@@ -52,6 +52,7 @@ class Relu_33(nn.Module):
 class Relu_43(nn.Module):
     def __init__(self):
         super(Relu_43, self).__init__()
+
         self.features = original_model.features[:-8]
 
     def forward(self, x):
