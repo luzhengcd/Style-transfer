@@ -7,6 +7,7 @@ from lossCalculation import *
 
 
 
+
 class AverageMeter(object):
 
     def __init__(self):
@@ -74,13 +75,13 @@ def train(model, device, data_loader,
     for i, input in data_iterator:
 
         # this is the input frame!!!!
+        # print('memory management: ', torch.cuda.memory_allocated(device))
 
         data_time.update((time.time() - end))
 
-        y_org = input[0]
-        y_c = y_org
+        y_c = input[0]
 
-        current_input = y_org.to(device)
+        current_input = y_c.to(device)
         pre_input = pre.to(device)
 
         optimizer.zero_grad()
@@ -88,19 +89,18 @@ def train(model, device, data_loader,
 
         feature_current, y_hat_current = model(current_input)
         feature_pre, y_hat_pre = model(pre_input)
-        
-        pre = y_c
 
+        pre = current_input
 
-        loss_content = contentLoss(y_c, y_hat_current, criterion)
+        loss_content = contentLoss(current_input, y_hat_current, criterion)
         loss_style = sWeight * styleLoss(y_s, y_hat_current, criterion)
 
         # def temporalF(f_current, f_pre, flow, criterion):
         # def temporalO(O_current, O_pre, I_current, I_pre, criterion, flow):
 
-        flow = warp_flow(pre_input, current_input)
+        flow = calFlow(pre_input, current_input)
 
-        loss_temporalF = temporalF(feature_current, feature_pre, flow)
+        loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
         loss_temporalO = temporalO(y_hat_current, y_hat_pre, current_input, pre_input, criterion, flow)
 
 

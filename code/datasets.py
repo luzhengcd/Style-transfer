@@ -31,8 +31,6 @@ def readData(path_lst):
                 else:
                     continue
 
-
-
     stacked_tensor = torch.stack(tensor_lst)
     stacked_tensor = stacked_tensor.to('cuda' if torch.cuda.is_available() else 'cpu')
     dataset = TensorDataset(stacked_tensor)
@@ -51,17 +49,18 @@ def crop_array(h, w, img_arr):
 
 def readVideo(path):
     # path is the directory of the video
-    img_width = 640
-    img_height = 360
+    img_width = 256
+    img_height = 256
     tensor_lst = []
     cap = cv2.VideoCapture(path)
-
+    # count = 0
     while (True):
         ret, frame = cap.read()
 
         if ret:
 
-
+            # count = count+1
+            # print(count)
             img_new = torch.Tensor( crop_array(img_height, img_width, frame) ) / 255.0
 
             img_new = img_new.reshape(3, img_height, img_width)
@@ -77,7 +76,7 @@ def readVideo(path):
     cv2.destroyAllWindows()
     cap.release()
     stacked_tensor = torch.stack(tensor_lst)
-    stacked_tensor = stacked_tensor.to('cuda' if torch.cuda.is_available() else 'cpu')
+    stacked_tensor = stacked_tensor
     dataset = TensorDataset(stacked_tensor)
 
     return dataset

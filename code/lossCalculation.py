@@ -15,7 +15,18 @@ To calculate the loss, the following steps need to be implemented:
     - Perform the optimization
 """
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+relu12 = Relu_12()
+relu22 = Relu_22()
+relu33 = Relu_33()
+relu43 = Relu_43()
+
+
+relu12.to(device)
+relu22.to(device)
+relu33.to(device)
+relu43.to(device)
 
 def styleLoss(y_s, y_hat, criterion):
     """
@@ -26,17 +37,6 @@ def styleLoss(y_s, y_hat, criterion):
     cuz we need to update the variable to minimize the cost function
     """
     #   perform a forward pass for both y_s and y_hat
-    relu12 = Relu_12()
-    relu22 = Relu_22()
-    relu33 = Relu_33()
-    relu43 = Relu_43()
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
-    relu12.to(device)
-    relu22.to(device)
-    relu33.to(device)
-    relu43.to(device)
 
     """
     The dimension of outputs from each relu layer:
@@ -65,7 +65,7 @@ def styleLoss(y_s, y_hat, criterion):
     loss4 = criterion(utils.Gram(output43_hat), utils.Gram(output43_ys))
 
     total_style_loss = loss1 + loss2 + loss3 + loss4
-    total_style_loss = total_style_loss.to('cuda' if torch.cuda.is_available() else 'cpu')
+    total_style_loss = total_style_loss
     return total_style_loss
 
 # def help_style(y_s, y_hat, ):
@@ -79,9 +79,6 @@ def styleLoss(y_s, y_hat, criterion):
 
 def contentLoss(y_c, y_hat, criterion):
     y_c_new = y_c[:,:,40:-40, 40:-40]
-    relu22 = Relu_22()
-
-    relu22.to('cuda' if torch.cuda.is_available() else 'cpu')
 
     output22_yc = relu22(y_c_new)
     output22_hat = relu22(y_hat)
@@ -92,13 +89,8 @@ def contentLoss(y_c, y_hat, criterion):
     hat_flatten = output22_hat.reshape(output22_hat.shape[0], -1)
     yc_flatten = output22_yc.reshape(output22_yc.shape[0], -1)
 
-    # mean_hat = torch.mean(hat_flatten)
-    # mean_yc = torch.mean(yc_flatten)
-
-
-    # loss_content = 0.5 * torch.sum(((hat_flatten - mean_hat) - (yc_flatten - mean_hat)) ** 2) / \
-    #                ((torch.sum((hat_flatten -mean_hat)**2 ) + torch.sum((yc_flatten - mean_yc) ** 2)) * CHW)
     loss_content = criterion(hat_flatten, yc_flatten)
+
     return loss_content
 
 def temporalF(f_current, f_pre, flow, criterion):
