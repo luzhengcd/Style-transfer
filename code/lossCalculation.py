@@ -78,9 +78,10 @@ def styleLoss(y_s, y_hat, criterion):
 #     return loss
 
 def contentLoss(y_c, y_hat, criterion):
-    y_c_new = y_c[:,:,40:-40, 40:-40]
 
-    output22_yc = relu22(y_c_new)
+    # y_c_new = y_c[:,:,40:-40, 40:-40]
+
+    output22_yc = relu22(y_c)
     output22_hat = relu22(y_hat)
     # squared, normalized Euclidean distance between feature representations
 
@@ -96,7 +97,8 @@ def contentLoss(y_c, y_hat, criterion):
 def temporalF(f_current, f_pre, flow, criterion):
 
     f_warp = warp_flow(f_pre, flow)
-
+    print('first', f_warp.shape)
+    print('second', f_current.shape)
     return criterion(f_current, f_warp)
 
 
@@ -105,16 +107,21 @@ def temporalO(O_current, O_pre, I_current, I_pre, criterion, flow):
     # For BGR image, it returns an array of Blue, Green, Red values. (B, G, R)
     O_warp = warp_flow(O_pre, flow)
     I_warp = warp_flow(I_pre, flow)
-
+    # print(O_current.shape)
+    # print(O_warp.shape)
     temp1 = O_current -  O_warp
     temp2 = I_current - I_warp
 
     # 3 channels:
-    b = temp2[:,:,0]
-    g = temp2[:,:,1]
-    r = temp2[:,:,2]
+    b = temp2[:, 0, :, :]
+    g = temp2[:, 1, :, :]
+    r = temp2[:, 2, :, :]
     # based on the paper, calculate the relative luminance
 
     Y = 0.2126 * r + 0.7152*g + 0.0722*b
+    Y = Y.reshape((2, 1, 256, 256))
+    # print('temp shape: ', temp2.shape)
+    # print('first shape', temp1.shape)
+    # print('second shape', Y.shape)
 
     return criterion(temp1, Y)

@@ -21,7 +21,7 @@ parser.add_argument('-style', type = str, default= 'mosaic')
 parser.add_argument('-cWeight', type = float, default=1)
 parser.add_argument('-sWeight', type = float, default= 1000)
 parser.add_argument('-trainSize', type = int, default=2000)
-parser.add_argument('-oWeight', type = float, default = 1000)
+parser.add_argument('-oWeight', type = float, default = 1)
 parser.add_argument('-fWeight', type = float, default=1000)
 args = parser.parse_args()
 

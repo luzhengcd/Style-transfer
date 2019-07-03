@@ -6,7 +6,7 @@ class TransferNet(nn.Module):
     def __init__(self):
         super(TransferNet, self).__init__()
         # Convolutional layer
-
+        self.ref = nn.ReflectionPad2d( (40,40, 40 , 40))
         self.conv1 = nn.Conv2d(in_channels = 3, out_channels = 32,
                                kernel_size= 9,stride = 1, padding=4)
 
@@ -82,6 +82,9 @@ class TransferNet(nn.Module):
 
     def forward(self, x):
         # print('original: ', x.shape)
+
+        x = self.ref(x)
+        # print('after padding: ', x.shape)
         x = self.conv1(x)
         x = F.relu(self.bn1(x))
         # print('after first layer: ', x.shape)

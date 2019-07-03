@@ -99,12 +99,14 @@ def train(model, device, data_loader,
         # def temporalO(O_current, O_pre, I_current, I_pre, criterion, flow):
 
         flow = calFlow(pre_input, current_input)
-
-        loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
+        #
+        # print('feature pre shape',feature_pre.shape)
+        # print('feature current shape', feature_current.shape)
         loss_temporalO = temporalO(y_hat_current, y_hat_pre, current_input, pre_input, criterion, flow)
+        # loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
 
 
-        loss = cWeight * loss_content + loss_style + fWeight * loss_temporalF + oWeight * loss_temporalO
+        loss = cWeight * loss_content + loss_style  + oWeight * loss_temporalO
         loss.to(device)
         loss.backward()
         optimizer.step()
