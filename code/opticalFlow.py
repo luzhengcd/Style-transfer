@@ -17,9 +17,9 @@ def calFlow(pre_batch, current_batch):
     pre_batch = reshape_batch(pre_batch, batch_size)
     current_batch = reshape_batch(current_batch, batch_size)
 
-    flow_lst = [cv2.calcOpticalFlowFarneback(cv2.cvtColor(np.float32(pre_batch[i]),
+    flow_lst = [cv2.calcOpticalFlowFarneback(cv2.cvtColor(np.float32(pre_batch[i].cpu()),
                                                                        cv2.COLOR_BGR2GRAY),
-                                                          cv2.cvtColor(np.float32(current_batch[i]),
+                                                          cv2.cvtColor(np.float32(current_batch[i].cpu()),
                                                                        cv2.COLOR_BGR2GRAY),
                                                           None, 0.5, 3, 15, 3, 5, 1.2, 0)
                 for i in range(batch_size)]
@@ -47,7 +47,7 @@ def warp_flow(batch, flow_lst):
 
     # cv2.remap(batch_reshape[0].data.numpy(), flow_lst[0], None, cv2.INTER_LINEAR)
 
-    warped_lst = [torch.Tensor(cv2.remap(batch_reshape[i].data.numpy(), flow_lst[i],
+    warped_lst = [torch.Tensor(cv2.remap(batch_reshape[i].cpu().data.numpy(), flow_lst[i],
                         None, cv2.INTER_LINEAR)) for i in range(batch_size)]
 
     warped = torch.stack(warped_lst)

@@ -109,6 +109,8 @@ def temporalO(O_current, O_pre, I_current, I_pre, criterion, flow):
     I_warp = warp_flow(I_pre, flow)
     # print(O_current.shape)
     # print(O_warp.shape)
+    O_warp = O_warp.to(device)
+    I_warp = I_warp.to(device)
     temp1 = O_current -  O_warp
     temp2 = I_current - I_warp
 

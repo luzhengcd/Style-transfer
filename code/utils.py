@@ -126,7 +126,7 @@ def train(model, device, data_loader,
               'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
               'Content loss {closs.val:.4f} ({closs.avg:.4f})\t'
               'Style loss {sloss.val:.4f} ({sloss.avg:.4f})\t'
-              'Temporal loss{oloss.val:.4f} ({oloss.avg:.4f})'
+              'Temporal loss {oloss.val:.4f} ({oloss.avg:.4f})'
               .format(epoch, i, len(data_loader), batch_time=batch_time, data_time=data_time, loss=losses,
                       closs = loss_content_track, sloss = loss_style_track, oloss = loss_temporal_track))
 
