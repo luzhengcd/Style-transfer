@@ -71,10 +71,10 @@ def train(model, device, data_loader,
     for i, input in enumerate(data_loader):
         data_time.update((time.time() - end))
 
-        y_org = input[0]
-        y_c = y_org
+        y_c = input[0]
+        # y_c = y_org
 
-        input = y_org.to(device)
+        input = y_c.to(device)
 
         optimizer.zero_grad()
 

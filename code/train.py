@@ -15,7 +15,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-outpath', type = str, default='model')
 parser.add_argument('-style', type = str, default= 'mosaic')
 parser.add_argument('-cWeight', type = float, default=1)
-parser.add_argument('-sWeight', type = float, default= 10000)
+parser.add_argument('-sWeight', type = float, default= 2000)
 parser.add_argument('-trainSize', type = int, default=2000)
 args = parser.parse_args()
 
@@ -28,7 +28,7 @@ if torch.cuda.is_available():
     torch.cuda.manual_seed(0)
 
 
-PATH_TRAIN_FILE = r'../data/train2014/train2014/*'
+PATH_TRAIN_FILE = r'../data/train2014/*'
 PATH_STYLE = r'../data/styleImg/'+ args.style +'.jpg'
 pic_path = glob.glob(PATH_TRAIN_FILE)
 pic_path = pic_path[:args.trainSize]

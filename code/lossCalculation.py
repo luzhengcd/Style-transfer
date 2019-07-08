@@ -77,17 +77,19 @@ def styleLoss(y_s, y_hat, criterion):
 #     return loss
 
 def contentLoss(y_c, y_hat, criterion):
-    y_c_new = y_c[:,:,40:-40, 40:-40]
+    # y_c_new = y_c[:,:,40:-40, 40:-40]
     relu22 = Relu_22()
 
     relu22.to('cuda' if torch.cuda.is_available() else 'cpu')
 
-    output22_yc = relu22(y_c_new)
+
+    output22_yc = relu22(y_c)
     output22_hat = relu22(y_hat)
     # squared, normalized Euclidean distance between feature representations
 
     # CHW = torch.prod(torch.tensor(y_c_new.shape[1:]))
     # The shape of the output22_yc is [#pic, ...]
+
     hat_flatten = output22_hat.reshape(output22_hat.shape[0], -1)
     yc_flatten = output22_yc.reshape(output22_yc.shape[0], -1)
 
@@ -97,5 +99,8 @@ def contentLoss(y_c, y_hat, criterion):
 
     # loss_content = 0.5 * torch.sum(((hat_flatten - mean_hat) - (yc_flatten - mean_hat)) ** 2) / \
     #                ((torch.sum((hat_flatten -mean_hat)**2 ) + torch.sum((yc_flatten - mean_yc) ** 2)) * CHW)
+    # print(hat_flatten.shape)
+    # print(yc_flatten.shape)
+
     loss_content = criterion(hat_flatten, yc_flatten)
     return loss_content

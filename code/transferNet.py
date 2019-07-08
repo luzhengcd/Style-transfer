@@ -7,6 +7,8 @@ class TransferNet(nn.Module):
         super(TransferNet, self).__init__()
         # Convolutional layer
 
+        self.ref = nn.ReflectionPad2d((40, 40, 40, 40))
+
         self.conv1 = nn.Conv2d(in_channels = 3, out_channels = 32,
                                kernel_size= 9,stride = 1, padding=4)
         self.bn1 = nn.InstanceNorm2d(32)
@@ -75,10 +77,13 @@ class TransferNet(nn.Module):
         self.conv5 = nn.ConvTranspose2d(in_channels=64, out_channels=32,
                                kernel_size=3, stride=2)
         self.bn5 = nn.InstanceNorm2d(32)
-        self.conv6 = nn.ConvTranspose2d(in_channels=32, out_channels=3,
-                               kernel_size=9, stride=1)
+        self.conv6 = nn.Conv2d(in_channels=32, out_channels=3,
+                               kernel_size=9, stride=1, padding=4)
 
     def forward(self, x):
+
+        x = self.ref(x)
+
         x = self.conv1(x)
         x = F.relu(self.bn1(x))
         x = self.conv2(x)
@@ -117,10 +122,10 @@ class TransferNet(nn.Module):
 
         x = self.conv5(x)
         x = F.relu(self.bn5(x))
-        x = x[:, :, 1:, 1:]
+        x = x[:, :, :-1, :-1]
         x = self.conv6(x)
 
         x = F.tanh(x)
-        x = x[:, :, 4:-4, 4:-4]
+        # x = x[:, :, 4:-4, 4:-4]
 
         return x

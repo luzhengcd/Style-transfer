@@ -25,10 +25,10 @@ def readData(path_lst):
                 channel = img_new.shape[0]
                 if channel == 3:
                     img_new = transforms.Normalize(mean = [0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img_new)
-                    img_new = img_new.unsqueeze(0)
-                    img_reflection = F.pad(img_new, pad = (40, 40, 40, 40), mode='reflect')
-                    img_reflection = img_reflection.reshape(img_reflection.shape[1:])
-                    tensor_lst.append(img_reflection)
+                    # img_new = img_new.unsqueeze(0)
+                    # img_reflection = F.pad(img_new, pad = (40, 40, 40, 40), mode='reflect')
+                    # img_reflection = img_reflection.reshape(img_reflection.shape[1:])
+                    tensor_lst.append(img_new)
                 else:
                     continue
 
