@@ -81,9 +81,9 @@ def train(model, device, data_loader,
 
         y_hat = model(input)
 
-        loss_content = contentLoss(y_c, y_hat, criterion)
+        loss_content = cWeight * contentLoss(y_c, y_hat, criterion)
         loss_style = sWeight * styleLoss(y_s, y_hat, criterion)
-        loss = cWeight * loss_content +  loss_style
+        loss = loss_content +  loss_style
         loss.to(device)
         loss.backward()
         optimizer.step()
