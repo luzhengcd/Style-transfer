@@ -54,13 +54,14 @@ def Gram(X):
 
 
 def train(model, device, data_loader,
-          optimizer, epoch, y_s, criterion, cWeight, sWeight, fWeight, oWeight):
+          optimizer, epoch, y_s, criterion, cWeight, sWeight, oWeight):
 
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
     loss_content_track = AverageMeter()
     loss_style_track = AverageMeter()
+    loss_temporal_track = AverageMeter()
 
     model.train()
 
@@ -92,7 +93,7 @@ def train(model, device, data_loader,
 
         pre = current_input
 
-        loss_content = contentLoss(current_input, y_hat_current, criterion)
+        loss_content = cWeight * contentLoss(current_input, y_hat_current, criterion)
         loss_style = sWeight * styleLoss(y_s, y_hat_current, criterion)
 
         # def temporalF(f_current, f_pre, flow, criterion):
@@ -102,11 +103,11 @@ def train(model, device, data_loader,
         #
         # print('feature pre shape',feature_pre.shape)
         # print('feature current shape', feature_current.shape)
-        loss_temporalO = temporalO(y_hat_current, y_hat_pre, current_input, pre_input, criterion, flow)
+        loss_temporalO = oWeight * temporalO(y_hat_current, y_hat_pre, current_input, pre_input, criterion, flow)
         # loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
 
 
-        loss = cWeight * loss_content + loss_style  + oWeight * loss_temporalO
+        loss = loss_content + loss_style  + loss_temporalO
         loss.to(device)
         loss.backward()
         optimizer.step()
@@ -117,15 +118,17 @@ def train(model, device, data_loader,
         losses.update(loss.item())
         loss_content_track.update(loss_content)
         loss_style_track.update(loss_style)
+        loss_temporal_track.update(loss_temporalO)
 
         print('Epoch: [{0}][{1}/{2}]\t'
               'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
               'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
               'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
               'Content loss {closs.val:.4f} ({closs.avg:.4f})\t'
-              'Style loss {sloss.val:.4f} ({sloss.avg:.4f})'
+              'Style loss {sloss.val:.4f} ({sloss.avg:.4f})\t'
+              'Temporal loss{oloss.val:.4f} ({oloss.avg:.4f})'
               .format(epoch, i, len(data_loader), batch_time=batch_time, data_time=data_time, loss=losses,
-                      closs = loss_content_track, sloss = loss_style_track))
+                      closs = loss_content_track, sloss = loss_style_track, oloss = loss_temporal_track))
 
     return losses.avg
 
