@@ -54,7 +54,10 @@ optimizer = optim.Adam(model.parameters(), lr = 0.001)
 model.to(device)
 criterion.to(device)
 
-num_pic_each = 1000
+num_pic_each = 2000
+torch.manual_seed(42)
+torch.cuda.manual_seed(42)
+
 
 for i in range(int(NUM_PIC / num_pic_each)):
 
