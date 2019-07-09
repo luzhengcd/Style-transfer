@@ -74,8 +74,12 @@ def readVideo(path):
 
     cv2.destroyAllWindows()
     cap.release()
-    stacked_tensor = torch.stack(tensor_lst)
-    stacked_tensor = stacked_tensor
+    if len(tensor_lst) % 2 == 0:
+        stacked_tensor = torch.stack(tensor_lst)
+
+    else:
+        stacked_tensor = torch.stack(tensor_lst[:-1])
+
     dataset = TensorDataset(stacked_tensor)
 
     return dataset

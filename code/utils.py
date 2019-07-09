@@ -71,7 +71,7 @@ def train(model, device, data_loader,
     data_iterator = enumerate(data_loader)
 
     pre = next(data_iterator)[1][0]
-
+    # print(pre.shape)
 
     for i, input in data_iterator:
 
@@ -81,6 +81,9 @@ def train(model, device, data_loader,
         data_time.update((time.time() - end))
 
         y_c = input[0]
+
+        # print(y_c.shape)
+
 
         current_input = y_c.to(device)
         pre_input = pre.to(device)
