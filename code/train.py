@@ -2,7 +2,7 @@
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import argparse
-
+import timing
 from torchvision import models
 from transferNet import TransferNet
 from utils import *
