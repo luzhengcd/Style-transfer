@@ -3,7 +3,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import argparse
 import timing
-from torchvision import models
+import torch
 from transferNet import TransferNet
 from utils import *
 import torch.nn as nn
@@ -26,6 +26,8 @@ parser.add_argument('-oWeight', type = float, default = 100)
 # parser.add_argument('-fWeight', type = float, default=1000)
 args = parser.parse_args()
 
+torch.manual_seed(42)
+torch.cuda.manual_seed(42)
 
 vgg16 = models.vgg16(pretrained=True)
 vgg16.to('cuda' if torch.cuda.is_available() else 'cpu')
