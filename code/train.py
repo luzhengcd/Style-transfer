@@ -2,7 +2,7 @@
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import argparse
-
+import timing
 from torchvision import models
 from transferNet import TransferNet
 from utils import *
@@ -10,6 +10,7 @@ import torch.nn as nn
 from datasets import readData, styleImg, readVideo
 import lossCalculation
 import glob
+
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -83,10 +84,11 @@ for i in range(NUM_VIDEO):
         print(epoch)
 
         train_loss = train(model, device, train_loader, optimizer, NUM_EPOCHS, y_s,
-                           criterion, args.cWeight, args.sWeight, args.oWeight)
+                           criterion, args.cWeight, args.sWeight, args.oWeight, epoch)
 
     print( '===========[{0}/{1}]============\t'
            .format(i, NUM_VIDEO))
 
 
 torch.save(model.state_dict(), '../model/' + args.outpath + '.pth')
+print('===== Finished =====')
