@@ -106,3 +106,55 @@ def train(model, device, data_loader,
 
     return losses.avg
 
+def evaluate(model, device, data_loader, criterion,  sWeight, cWeight, y_s, print_freq = 10):
+
+    batch_time = AverageMeter()
+
+    # losses = AverageMeter()
+    # accuracy = AverageMeter()
+
+    losses = AverageMeter()
+    loss_content_track = AverageMeter()
+    loss_style_track = AverageMeter()
+
+    result = []
+
+    model.eval()
+    with torch.no_grad():
+        end = time.time()
+
+        for i,(input, target) in enumerate(data_loader):
+
+            input = input.to(device)
+
+            y_c = input[0]
+            # y_c = y_org
+
+            input = y_c.to(device)
+
+            y_hat = model(input)
+
+            loss_content = cWeight * contentLoss(y_c, y_hat, criterion)
+            loss_style = sWeight * styleLoss(y_s, y_hat, criterion)
+
+            loss = loss_content + loss_style
+
+            # loss.to(device)
+
+            batch_time.update(time.time() - end)
+            end = time.time()
+
+            losses.update(loss.item())
+            loss_content_track.update(loss_content)
+            loss_style_track.update(loss_style)
+
+            print('Test: [{0}/{1}]\t'
+                  'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+                  'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
+                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+                  'Content loss {closs.val:.4f} ({closs.avg:.4f})\t'
+                  'Style loss {sloss.val:.4f} ({sloss.avg:.4f})'
+                  .format( i, len(data_loader), batch_time=batch_time, data_time=batch_time, loss=losses,
+                          closs=loss_content_track, sloss=loss_style_track))
+
+        return losses.avg, loss_style_track.avg, loss_content_track.avg
