@@ -123,7 +123,7 @@ def evaluate(model, device, data_loader, criterion,  sWeight, cWeight, y_s, prin
     with torch.no_grad():
         end = time.time()
 
-        for i,(input, target) in enumerate(data_loader):
+        for i, input in enumerate(data_loader):
 
             input = input.to(device)
 
