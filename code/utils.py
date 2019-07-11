@@ -125,7 +125,7 @@ def evaluate(model, device, data_loader, criterion,  sWeight, cWeight, y_s, prin
 
         for i, input in enumerate(data_loader):
 
-            input = input.to(device)
+            # input = input.to(device)
 
             y_c = input[0]
             # y_c = y_org
@@ -139,7 +139,6 @@ def evaluate(model, device, data_loader, criterion,  sWeight, cWeight, y_s, prin
 
             loss = loss_content + loss_style
 
-            # loss.to(device)
 
             batch_time.update(time.time() - end)
             end = time.time()
