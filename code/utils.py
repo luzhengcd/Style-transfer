@@ -38,7 +38,7 @@ def Gram(X):
     # [#pic, channel, w, h] where w = h
     # the output should be [#pic, channel, channel]
     temp = X.shape
-    X = X.reshape(temp[0], temp[1], temp[2] ** 2)
+    X = X.reshape(temp[0], temp[1], temp[2] * temp[3])
     num_pic = temp[0]
 
     gram_lst = []

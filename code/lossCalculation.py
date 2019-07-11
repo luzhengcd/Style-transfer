@@ -52,8 +52,8 @@ def styleLoss(y_s, y_hat, criterion):
     output22_hat = relu22(y_hat)
     output33_ys = relu33(y_s)
     output33_hat = relu33(y_hat)
-    output43_ys = relu43(y_s)
-    output43_hat = relu43(y_hat)
+    # output43_ys = relu43(y_s)
+    # output43_hat = relu43(y_hat)
 
     #   calculate the gram matrix for each layer
     #   right now, we assume the outputs have a shape of [3,.., ..]
@@ -62,9 +62,10 @@ def styleLoss(y_s, y_hat, criterion):
     loss1 = criterion(utils.Gram(output12_hat), utils.Gram(output12_ys))
     loss2 = criterion(utils.Gram(output22_hat), utils.Gram(output22_ys))
     loss3 = criterion(utils.Gram(output33_hat), utils.Gram(output33_ys))
-    loss4 = criterion(utils.Gram(output43_hat), utils.Gram(output43_ys))
+    # loss4 = criterion(utils.Gram(output43_hat), utils.Gram(output43_ys))
 
-    total_style_loss = loss1 + loss2 + loss3 + loss4
+    total_style_loss = loss1 + loss2 + loss3
+                       # + loss4
     total_style_loss = total_style_loss
     return total_style_loss
 
@@ -106,24 +107,26 @@ def temporalO(O_current, O_pre, I_current, I_pre, criterion, flow):
 
     # For BGR image, it returns an array of Blue, Green, Red values. (B, G, R)
     O_warp = warp_flow(O_pre, flow)
-    I_warp = warp_flow(I_pre, flow)
+    # I_warp = warp_flow(I_pre, flow)
     # print(O_current.shape)
     # print(O_warp.shape)
     O_warp = O_warp.to(device)
-    I_warp = I_warp.to(device)
-    temp1 = O_current -  O_warp
-    temp2 = I_current - I_warp
+    # I_warp = I_warp.to(device)
+    # temp1 = O_current -  O_warp
+    # temp2 = I_current - I_warp
 
     # 3 channels:
-    b = temp2[:, 0, :, :]
-    g = temp2[:, 1, :, :]
-    r = temp2[:, 2, :, :]
+    # b = temp2[:, 0, :, :]
+    # g = temp2[:, 1, :, :]
+    # r = temp2[:, 2, :, :]
     # based on the paper, calculate the relative luminance
 
-    Y = 0.2126 * r + 0.7152*g + 0.0722*b
-    Y = Y.reshape((2, 1, 256, 256))
+    # Y = 0.2126 * r + 0.7152*g + 0.0722*b
+    # (#frame, C, H, W)
+    # Y = Y.reshape((2, 1, temp1.shape[2], temp1.shape[3]))
     # print('temp shape: ', temp2.shape)
     # print('first shape', temp1.shape)
     # print('second shape', Y.shape)
 
-    return criterion(temp1, Y)
+    # return criterion(temp1, Y)
+    return criterion(O_warp, O_current)

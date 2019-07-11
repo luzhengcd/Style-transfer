@@ -41,8 +41,8 @@ def warp_flow(batch, flow_lst):
 
 
     for i in range(batch_size):
-        flow_lst[i][:, :, 0] += np.arange(h)
-        flow_lst[i][:, :, 1] += np.arange(w)[:, np.newaxis]
+        flow_lst[i][:, :, 0] += np.arange(h)[:, np.newaxis]
+        flow_lst[i][:, :, 1] += np.arange(w)
 
 
     # cv2.remap(batch_reshape[0].data.numpy(), flow_lst[0], None, cv2.INTER_LINEAR)
