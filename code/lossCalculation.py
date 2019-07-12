@@ -103,7 +103,7 @@ def temporalF(f_current, f_pre, flow, criterion):
     return criterion(f_current, f_warp)
 
 
-def temporalO(O_current, O_pre, I_current, I_pre, criterion, flow):
+def temporalO(O_current, O_pre, criterion, flow):
 
     # For BGR image, it returns an array of Blue, Green, Red values. (B, G, R)
     O_warp = warp_flow(O_pre, flow)

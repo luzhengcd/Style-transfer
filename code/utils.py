@@ -135,3 +135,73 @@ def train(model, device, data_loader,
 
     return losses.avg
 
+def evaluate(model, device, data_loader, criterion,  sWeight, cWeight, y_s, oWeight, print_freq = 10):
+    batch_time = AverageMeter()
+    data_time = AverageMeter()
+    losses = AverageMeter()
+    loss_content_track = AverageMeter()
+    loss_style_track = AverageMeter()
+    loss_temporal_track = AverageMeter()
+
+    model.eval()
+
+    end = time.time()
+
+    data_iterator = enumerate(data_loader)
+
+    pre = next(data_iterator)[1][0]
+    # print(pre.shape)
+
+    for i, input in data_iterator:
+        # this is the input frame!!!!
+        # print('memory management: ', torch.cuda.memory_allocated(device))
+
+        data_time.update((time.time() - end))
+
+        y_c = input[0]
+
+        current_input = y_c.to(device)
+        pre_input = pre.to(device)
+
+        feature_current, y_hat_current = model(current_input)
+        feature_pre, y_hat_pre = model(pre_input)
+
+        pre = current_input
+
+        loss_content = cWeight * contentLoss(current_input, y_hat_current, criterion)
+        loss_style = sWeight * styleLoss(y_s, y_hat_current, criterion)
+
+        # def temporalF(f_current, f_pre, flow, criterion):
+        # def temporalO(O_current, O_pre, I_current, I_pre, criterion, flow):
+
+        flow = calFlow(pre_input, current_input)
+        #
+        # print('feature pre shape',feature_pre.shape)
+        # print('feature current shape', feature_current.shape)
+        loss_temporalO = oWeight * temporalO(y_hat_current, y_hat_pre, criterion, flow)
+        # loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
+
+        loss = loss_content + loss_style + loss_temporalO
+
+
+        batch_time.update(time.time() - end)
+        end = time.time()
+
+        losses.update(loss.item())
+        loss_content_track.update(loss_content)
+        loss_style_track.update(loss_style)
+        loss_temporal_track.update(loss_temporalO)
+
+        print('Test: [{0}/{1}]\t'
+              'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+              'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
+              'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+              'Content loss {closs.val:.4f} ({closs.avg:.4f})\t'
+              'Style loss {sloss.val:.4f} ({sloss.avg:.4f})\t'
+              'Temporal loss {oloss.val:.4f} ({oloss.avg:.4f})'
+              .format(  i, len(data_loader), batch_time=batch_time, data_time=data_time,
+                      loss=losses,
+                      closs=loss_content_track, sloss=loss_style_track, oloss=loss_temporal_track))
+
+
+        return losses.avg, loss_style_track.avg, loss_content_track.avg, loss_temporal_track.avg
