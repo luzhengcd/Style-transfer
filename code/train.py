@@ -97,7 +97,7 @@ for i in range(int(NUM_PIC / num_pic_each)):
         val_losses, val_styleLoss, val_contentLoss = evaluate(model, device,VAL_loader, criterion,
                                                               args.sWeight, args.cWeight, y_s)
 
-        is_best = val_losses > best_val_loss
+        is_best = val_losses < best_val_loss
         if is_best:
             torch.save(model.state_dict(), '../model/' + args.outpath + '.pth')
 
