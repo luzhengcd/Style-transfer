@@ -107,14 +107,14 @@ for i in range(len(TRAIN_lst)):
 
 
 
-        for p in range(len(val_size)):
-            val_dataset = readData(VAL_lst[p])
+        for p in range(val_size):
+            val_dataset = readVideo(VAL_lst[p])
             val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=BATCH_SIZE,
                                            shuffle=False, num_workers=NUM_WORKERS)
 
             loss_avg, sLoss_avg, cLoss_avg, tLoss_avg = evaluate(model, device, val_loader, criterion,
                                                                  args.sWeight, args.cWeight, y_s, args.oWeight)
-            # def evaluate(model, device, data_loader, criterion, sWeight, cWeight, y_s, oWeight, print_freq=10):
+
         loss_temporal_track.update(tLoss_avg)
         loss_content_track.update(cLoss_avg)
         loss_style_track.update(sLoss_avg)

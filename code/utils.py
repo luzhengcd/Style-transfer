@@ -106,7 +106,7 @@ def train(model, device, data_loader,
         #
         # print('feature pre shape',feature_pre.shape)
         # print('feature current shape', feature_current.shape)
-        loss_temporalO = oWeight * temporalO(y_hat_current, y_hat_pre, current_input, pre_input, criterion, flow)
+        loss_temporalO = oWeight * temporalO(y_hat_current, y_hat_pre, criterion, flow)
         # loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
 
 
