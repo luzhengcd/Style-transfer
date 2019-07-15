@@ -34,8 +34,7 @@ def warp_flow(batch, flow_lst):
     batch_size = batch.shape[0]
     # batch size would be 2
     #
-    # print(batch.shape)
-    # print(batch_size)
+
     batch_reshape =reshape_batch(batch, batch_size)
     h, w = flow_lst[0].shape[:2]
 

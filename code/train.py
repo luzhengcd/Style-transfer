@@ -15,7 +15,6 @@ from utils import AverageMeter
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-# print('memory management: ', torch.cuda.memory_allocated(device))
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-outpath', type = str, default='modelVideo1')
@@ -43,7 +42,6 @@ PATH_STYLE = r'../data/styleImg/'+ args.style +'.jpg'
 pic_path = glob.glob(PATH_TRAIN_FILE)
 pic_path = pic_path[:args.trainSize]
 
-# NUM_PIC = len(pic_path)
 NUM_VIDEO = len(pic_path)
 
 
@@ -65,7 +63,6 @@ y_s = styleImg(PATH_STYLE).to('cuda' if torch.cuda.is_available() else 'cpu')
 model = TransferNet()
 
 criterion = nn.MSELoss()
-# print('memory management: ', torch.cuda.memory_allocated(device))
 
 
 optimizer = optim.Adam(model.parameters(), lr = 0.001)
@@ -100,30 +97,33 @@ for i in range(len(TRAIN_lst)):
         train_loss = train(model, device, train_loader, optimizer, NUM_EPOCHS, y_s,
                            criterion, args.cWeight, args.sWeight, args.oWeight, epoch)
 
-        losses = AverageMeter()
-        loss_content_track = AverageMeter()
-        loss_style_track = AverageMeter()
-        loss_temporal_track = AverageMeter()
+    losses = AverageMeter()
+    loss_content_track = AverageMeter()
+    loss_style_track = AverageMeter()
+    loss_temporal_track = AverageMeter()
 
+    model.eval()
+    for p in range(val_size):
+        torch.cuda.empty_cache()
 
+        # change name to train dataset and train loader to avoid the memory error
+        val_dataset = readVideo(VAL_lst[p])
 
-        for p in range(val_size):
-            val_dataset = readVideo(VAL_lst[p])
-            val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=BATCH_SIZE,
-                                           shuffle=False, num_workers=NUM_WORKERS)
+        val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=BATCH_SIZE,
+                                       shuffle=False, num_workers=NUM_WORKERS)
 
-            loss_avg, sLoss_avg, cLoss_avg, tLoss_avg = evaluate(model, device, val_loader, criterion,
-                                                                 args.sWeight, args.cWeight, y_s, args.oWeight)
+        loss_avg, sLoss_avg, cLoss_avg, tLoss_avg = evaluate(model, device, val_loader, criterion,
+                                                             args.sWeight, args.cWeight, y_s, args.oWeight)
 
-        loss_temporal_track.update(tLoss_avg)
-        loss_content_track.update(cLoss_avg)
-        loss_style_track.update(sLoss_avg)
-        losses.update(loss_avg)
+    loss_temporal_track.update(tLoss_avg)
+    loss_content_track.update(cLoss_avg)
+    loss_style_track.update(sLoss_avg)
+    losses.update(loss_avg)
 
-        is_best = losses.avg < best_val_loss
+    is_best = losses.avg < best_val_loss
 
-        if is_best:
-            torch.save(model.state_dict(), '../model/' + args.outpath + '.pth')
+    if is_best:
+        torch.save(model.state_dict(), '../model/' + args.outpath + '.pth')
 
     print( '===========[{0}/{1}]============\t'
            .format(i, NUM_VIDEO))
