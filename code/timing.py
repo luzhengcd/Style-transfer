@@ -2,6 +2,12 @@ import atexit
 from time import time, strftime, localtime
 from datetime import timedelta
 
+'''
+A script timing your code.
+To use it, simply import this in the beginning of your code.
+'''
+
+
 def secondsToStr(elapsed=None):
     if elapsed is None:
         return strftime("%Y-%m-%d %H:%M:%S", localtime())

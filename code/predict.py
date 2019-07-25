@@ -1,11 +1,21 @@
 import torch
-import scipy.misc
 import numpy as np
-import matplotlib.pyplot as plt
 import transferNet
 import torchvision.transforms as transforms
 from PIL import Image
+import argparse
 
+
+'''
+    This script is to yield stylized image given a trained model and an arbitrary content picture.
+    
+    It contains 2 functions:
+        recover_image: recall that we normalized the input in the training phase. This function, 
+                       as its name indicates, is to recover image by multiplying std and adding mean 
+                       so that it can be properly displayed.
+        imread:        Same as the one in datasets.py. It is used to read in a content picture you 
+                       want to transfer the style onto.      
+'''
 
 
 def recover_image(img):
@@ -22,8 +32,6 @@ def recover_image(img):
 
 def imread(path):
 
-#     The path is where the pictures are, not a specific picture
-
     transform_pipline = transforms.Compose([transforms.ToTensor(),
                                             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                  std=[0.229, 0.224, 0.225])
@@ -34,16 +42,30 @@ def imread(path):
             img_new = img_new.reshape((1, *img_new.shape))
     return img_new
 
-if __name__ == '__main__':
 
-    model_parameters = torch.load('../model.pth', map_location='cpu')
-    img_path = ''
+def predict(modelPath, imgPath, savePath):
+    # load the model parameters
+    model_parameters = torch.load('../'+ modelPath, map_location='cpu')
+    img_path = imgPath
     img = imread(img_path).type('torch.FloatTensor')
 
     model = transferNet.TransferNet()
     model.load_state_dict(model_parameters)
     out = model(img)
-
+    # try the following two ways to recover image and use the one working
     new_out = recover_image(out.data.cup().numpy())[0]
-    Image.fromarray(new_out)
+    # new_out = recover_image(out[0].data.cup().numpy())
 
+    # save the image
+    new_im = Image.fromarray(new_out[0, :], 'RGB')
+    new_im.save('../'+savePath)
+
+
+if __name__ == 'main':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-modelPath', type=str, default='model.pth')
+    parser.add_argument('-imgPath', type=str, default='imgPath')
+    parser.add_argument('-savePath', type = str, default = 'default.png')
+    args = parser.parse_args()
+
+    predict(args.ModelPath, args.imgPath, args.savePath)

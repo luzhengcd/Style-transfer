@@ -1,14 +1,20 @@
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
+'''
+Code out the network architecture following the paper.
+'''
+
+
 class TransferNet(nn.Module):
+
     def __init__(self):
+
         super(TransferNet, self).__init__()
-        # Convolutional layer
-
+        # reflection padding
         self.ref = nn.ReflectionPad2d((40, 40, 40, 40))
-
+        # 3 convolutional layers
         self.conv1 = nn.Conv2d(in_channels = 3, out_channels = 32,
                                kernel_size= 9,stride = 1, padding=4)
         self.bn1 = nn.InstanceNorm2d(32)
@@ -19,7 +25,8 @@ class TransferNet(nn.Module):
         self.conv3 = nn.Conv2d(in_channels= 64, out_channels=128,
                                kernel_size=3, stride=2, padding=1)
         self.bn3 = nn.InstanceNorm2d(128)
-        #   5 Residual blocks would be here
+
+        #   5 residual blocks
 
         self.block1 = nn.Sequential(
             nn.Conv2d(in_channels=128, out_channels=128,
@@ -70,13 +77,14 @@ class TransferNet(nn.Module):
                       kernel_size=3, padding=1),
             nn.InstanceNorm2d(128)
         )
-
+        # 2 deconvolutional layers
         self.conv4 = nn.ConvTranspose2d(in_channels=128, out_channels=64,
                                kernel_size=3, stride=2)
         self.bn4 = nn.InstanceNorm2d(64)
         self.conv5 = nn.ConvTranspose2d(in_channels=64, out_channels=32,
                                kernel_size=3, stride=2)
         self.bn5 = nn.InstanceNorm2d(32)
+        # final full connected layer
         self.conv6 = nn.Conv2d(in_channels=32, out_channels=3,
                                kernel_size=9, stride=1, padding=4)
 
@@ -126,6 +134,5 @@ class TransferNet(nn.Module):
         x = self.conv6(x)
 
         x = F.tanh(x)
-        # x = x[:, :, 4:-4, 4:-4]
 
         return x

@@ -1,11 +1,17 @@
 import scipy.misc as mic
 import numpy as np
 import torch
-import torch.nn.functional as F
 import time
 from lossCalculation import contentLoss, styleLoss
 
-
+'''
+This script contains necessary functions needed for model implementation. 
+    AverageMeter: A class used to keep track of the loss as the training goes
+    Gram:         Calculate the Gram matrix. check the paper for definition of Gram matrix
+    train:        Train the model
+    evaluate:     Evaluate the model
+    
+'''
 
 class AverageMeter(object):
 
@@ -25,22 +31,14 @@ class AverageMeter(object):
         self.avg = self.sum / self.count
 
 
-
-
-def imsave(path, img):
-    img = np.clip(img, 0, 255).astype(np.uint8)
-    mic.imsave(path, img)
-
-
-
 def Gram(X):
+    '''
+    :param X: A tensor of shape [#pic, #channel, width, height]
+    :return: A tensor of shape [#pic, #chennel, #chennel], which is [#pic, 3, 3] in our case
+    '''
 
-    # X would be a matrix with shape [#pic, ..., ..., ...] tensor
-    # The output should have a shape of [#pic, dim, dim], which is [#pic, 64, 64] in our case
-    # [#pic, channel, w, h] where w = h
-    # the output should be [#pic, channel, channel]
     temp = X.shape
-    X = X.reshape(temp[0], temp[1], temp[2] ** 2)
+    X = X.reshape(temp[0], temp[1], temp[2] * temp[3])
     num_pic = temp[0]
 
     gram_lst = []
@@ -48,7 +46,6 @@ def Gram(X):
     for num in range(num_pic):
         X_new = X[num]
         gram_temp = torch.mm(X_new, X_new.transpose(0,1))
-
         gram = gram_temp / np.prod(X_new.shape)
         gram_lst.append(gram)
     gram_tensor = torch.stack(gram_lst)
@@ -72,12 +69,9 @@ def train(model, device, data_loader,
         data_time.update((time.time() - end))
 
         y_c = input[0]
-        # y_c = y_org
-
         input = y_c.to(device)
 
         optimizer.zero_grad()
-
 
         y_hat = model(input)
 
@@ -110,9 +104,6 @@ def evaluate(model, device, data_loader, criterion,  sWeight, cWeight, y_s, prin
 
     batch_time = AverageMeter()
 
-    # losses = AverageMeter()
-    # accuracy = AverageMeter()
-
     losses = AverageMeter()
     loss_content_track = AverageMeter()
     loss_style_track = AverageMeter()
@@ -124,11 +115,7 @@ def evaluate(model, device, data_loader, criterion,  sWeight, cWeight, y_s, prin
         end = time.time()
 
         for i, input in enumerate(data_loader):
-
-            # input = input.to(device)
-
             y_c = input[0]
-            # y_c = y_org
 
             input = y_c.to(device)
 
@@ -138,7 +125,6 @@ def evaluate(model, device, data_loader, criterion,  sWeight, cWeight, y_s, prin
             loss_style = sWeight * styleLoss(y_s, y_hat, criterion)
 
             loss = loss_content + loss_style
-
 
             batch_time.update(time.time() - end)
             end = time.time()

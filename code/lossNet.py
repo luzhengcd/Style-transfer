@@ -1,14 +1,20 @@
 import torchvision.models as models
-import torch
 import torch.nn as nn
 
-
-# sometimes * before a tensor can flatten the tensor.
-
-# The layer for calculating the style loss:
-# relu 1-2, 2-2, 3-3. 4-3
-# The layer for the feature loss:
-# relu 3-3
+'''
+    This script builds the loss network based on a pre-trained vgg16 in pytorch.
+    The paper extracts output from different layers to represent the style and content.
+    You can visualize the output using optimization approach described in the paper. 
+    Visualization may help you decide what kind of layer combination can give you best result.
+    
+    I slice vgg16 and code out separate networks class for each layer. There must be a simpler 
+    way to do it. You may need to do some research if you want to make it more succinct.
+     
+    The style layer:
+        relu 1-2, 2-2, 3-3, 4-3
+    The content layer:
+        relu 3-3
+'''
 
 original_model = models.vgg16(pretrained=True)
 
@@ -18,10 +24,7 @@ class Relu_12(nn.Module):
         self.features = original_model.features[:-27]
 
     def forward(self, x):
-        # print('BEFORE RELU 12 SHAPE: ', x.shape)
-
         x = self.features(x)
-        # print('RELU 12 SHAPE: ', x.shape)
         return x
 
 
@@ -31,10 +34,7 @@ class Relu_22(nn.Module):
         self.features = original_model.features[:-22]
 
     def forward(self, x):
-        # print('BEFORE RELU 22 SHAPE: ', x.shape )
-
         x = self.features(x)
-        # print('RELU 22 SHAPE: ', x.shape )
         return x
 
 class Relu_33(nn.Module):
@@ -43,10 +43,7 @@ class Relu_33(nn.Module):
         self.features = original_model.features[:-15]
 
     def forward(self, x):
-        # print('BEFORE RELU 33 SHAPE: ', x.shape)
         x = self.features(x)
-        # print('RELU 33 SHAPE: ', x.shape)
-
         return x
 
 class Relu_43(nn.Module):
@@ -55,9 +52,6 @@ class Relu_43(nn.Module):
         self.features = original_model.features[:-8]
 
     def forward(self, x):
-        # print('BEFORE RELU 43 SHAPE: ', x.shape)
         x = self.features(x)
-        # print('RELU 43 SHAPE: ', x.shape)
-
         return x
 
