@@ -14,6 +14,9 @@ All the codes are written in Python3.6. To quickly install all the packages need
 
 There are two key parts in this project: transfer net and loss net.
 
-Transfer net is the neural network we need to train. Given a trained model, only a forward pass is needed to stylize any arbitrary picture. We follow []() to build the architecture of the transfer net (see figure 1). Comparing with the optimization-based approach proposed by .., the deep learning approach can achive millisecond style transfer with a single GPU without loss of visual quality of stylized output. 
+Transfer net is the neural network we need to train. Given a trained model, only a forward pass is needed to stylize any arbitrary picture. We follow []() to build the architecture of the transfer net (see figure 1). Comparing with the optimization-based approach proposed by .., the deep learning approach can achive millisecond style transfer without loss of visual quality of stylized output on a single GPU. 
 
-The
+The loss net is a pre-trained VGG16. VGG19 is also used in some researches. You can use either, but be careful that the content layer and style layer might be different for the two networks. 
+
+
+## Reference
