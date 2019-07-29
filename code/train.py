@@ -1,14 +1,10 @@
-
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import argparse
-import timing
-import torch
 from transferNet import TransferNet
 from utils import *
 import torch.nn as nn
 from datasets import readData, styleImg, readVideo
-import lossCalculation
 import glob
 from utils import AverageMeter
 
@@ -53,7 +49,7 @@ TRAIN_lst = list(set(pic_path) - set(VAL_lst))
 
 
 
-NUM_EPOCHS = 2
+NUM_EPOCHS = 1
 BATCH_SIZE = 2
 USE_CUDA = True
 NUM_WORKERS = 0

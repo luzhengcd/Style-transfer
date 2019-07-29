@@ -1,11 +1,6 @@
 import scipy.misc as mic
-import numpy as np
-import torch
-import torch.nn.functional as F
 import time
 from lossCalculation import *
-
-
 
 
 class AverageMeter(object):

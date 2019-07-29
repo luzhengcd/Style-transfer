@@ -1,5 +1,3 @@
-import numpy as np
-import pandas as pd
 import torch
 from torch.utils.data import TensorDataset, Dataset
 import cv2
@@ -61,10 +59,11 @@ def readVideo(path):
 
             # count = count+1
             # print(count)
-            img_new = torch.Tensor( crop_array(img_height, img_width, frame) ) / 255.0
+            img_new = torch.Tensor( crop_array(img_height, img_width, frame) )
+                      # / 255.0
             img_new = img_new.reshape(3, img_height, img_width)
 
-            img_new = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img_new)
+            # img_new = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img_new)
             # img_new = img_new.unsqueeze(0)
             # img_reflection = F.pad(img_new, pad=(40, 40, 40, 40), mode='reflect')
             # img_reflection = img_reflection.reshape(img_reflection.shape[1:])

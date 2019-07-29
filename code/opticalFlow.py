@@ -1,6 +1,12 @@
 import cv2
 import numpy as np
 import torch
+import deepmatching as dm
+import deepflow2
+import sys
+
+sys.path.append('deepmatching/')
+sys.path.append('deepflow2')
 
 def reshape_batch(batch, batch_size):
     res = batch.reshape((batch_size, *batch.shape[2:], batch.shape[1]))
