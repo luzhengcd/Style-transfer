@@ -1,10 +1,8 @@
-import torch
-import torch.nn as nn
 from lossNet import *
 import utils
 import numpy as np
-from torch.autograd import Variable
-from opticalFlow import *
+import cv2
+import IO
 
 """
 To calculate the loss, the following steps need to be implemented:
@@ -36,7 +34,7 @@ def styleLoss(y_s, y_hat, criterion):
     Note that y_hat and returned value should be a variable type
     cuz we need to update the variable to minimize the cost function
     """
-    #   perform a forward pass for both y_s and y_hat
+    # perform a forward pass for both y_s and y_hat
 
     """
     The dimension of outputs from each relu layer:
@@ -57,8 +55,7 @@ def styleLoss(y_s, y_hat, criterion):
 
     #   calculate the gram matrix for each layer
     #   right now, we assume the outputs have a shape of [3,.., ..]
-    # print(utils.Gram(output12_ys))
-    # print(utils.Gram(output12_hat))
+
     loss1 = criterion(utils.Gram(output12_hat), utils.Gram(output12_ys))
     loss2 = criterion(utils.Gram(output22_hat), utils.Gram(output22_ys))
     loss3 = criterion(utils.Gram(output33_hat), utils.Gram(output33_ys))
@@ -69,25 +66,17 @@ def styleLoss(y_s, y_hat, criterion):
     total_style_loss = total_style_loss
     return total_style_loss
 
-# def help_style(y_s, y_hat, ):
-#
-#     gram_y = utils.Gram(y_s)
-#     gram_y_hat = utils.Gram(y_hat)
-#
-#     temp_gram = (gram_y - gram_y_hat) ** 2
-#     loss = torch.sum(temp_gram)
-#     return loss
-
 def contentLoss(y_c, y_hat, criterion):
 
     # y_c_new = y_c[:,:,40:-40, 40:-40]
 
     output22_yc = relu22(y_c)
     output22_hat = relu22(y_hat)
-    # squared, normalized Euclidean distance between feature representations
 
+    # squared, normalized Euclidean distance between feature representations
     # CHW = torch.prod(torch.tensor(y_c_new.shape[1:]))
     # The shape of the output22_yc is [#pic, ...]
+
     hat_flatten = output22_hat.reshape(output22_hat.shape[0], -1)
     yc_flatten = output22_yc.reshape(output22_yc.shape[0], -1)
 
@@ -95,12 +84,42 @@ def contentLoss(y_c, y_hat, criterion):
 
     return loss_content
 
-def temporalF(f_current, f_pre, flow, criterion):
 
-    f_warp = warp_flow(f_pre, flow)
-    print('first', f_warp.shape)
-    print('second', f_current.shape)
-    return criterion(f_current, f_warp)
+def reshape_batch(batch, batch_size):
+    res = batch.reshape((batch_size, *batch.shape[2:], batch.shape[1]))
+    return res
+
+
+
+
+def warp_flow(batch, flow_path):
+    # note that img here is also a batch, which contains 2 images with the format of (#frame, C, H, W)
+    # after reshape, the shape of the batch becomes (#frame, H, W, C), and the shape of flow tensor is (#frame, H, W, grad)
+
+    # batch size would be 2
+    flow = IO.read(flow_path)
+    H, W = flow.shape[:2]
+
+    pic_after_arr = batch[1].data.cpu().numpy().reshape(H, W, 3)
+
+    flow[:, :, 0] += np.arange(W)
+    flow[:, :, 1] += np.arange(H)[:, np.newaxis]
+
+    res = cv2.remap(pic_after_arr, flow, None, cv2.INTER_LINEAR)
+
+    # back to the size of a normal batch
+    res_reshape = torch.Tensor(res.reshape((1, 3, H, W)))
+
+    return res_reshape
+
+
+def temporalF(batch, flow_path, criterion):
+
+    pre = batch[0]
+    warped = warp_flow(batch, flow_path)
+    # need to add mask later
+    warped = warped.to(device)
+    return criterion(pre, warped)
 
 
 def temporalO(O_current, O_pre, criterion, flow):

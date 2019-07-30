@@ -62,10 +62,9 @@ def train(model, device, data_loader,
 
     end = time.time()
 
-
     data_iterator = enumerate(data_loader)
 
-    pre = next(data_iterator)[1][0]
+    # pre = next(data_iterator)[1][0]
     # print(pre.shape)
 
     for i, input in data_iterator:
@@ -77,19 +76,14 @@ def train(model, device, data_loader,
 
         y_c = input[0]
 
-        # print(y_c.shape)
-
-
         current_input = y_c.to(device)
-        pre_input = pre.to(device)
 
         optimizer.zero_grad()
 
 
         feature_current, y_hat_current = model(current_input)
-        feature_pre, y_hat_pre = model(pre_input)
+        # feature_pre, y_hat_pre = model(pre_input)
 
-        pre = current_input
 
         loss_content = cWeight * contentLoss(current_input, y_hat_current, criterion)
         loss_style = sWeight * styleLoss(y_s, y_hat_current, criterion)
@@ -97,11 +91,11 @@ def train(model, device, data_loader,
         # def temporalF(f_current, f_pre, flow, criterion):
         # def temporalO(O_current, O_pre, I_current, I_pre, criterion, flow):
 
-        flow = calFlow(pre_input, current_input)
-        #
         # print('feature pre shape',feature_pre.shape)
         # print('feature current shape', feature_current.shape)
-        loss_temporalO = oWeight * temporalO(y_hat_current, y_hat_pre, criterion, flow)
+        # should have the same order
+
+        loss_temporalO = oWeight * temporalF(current_input, flow_path, criterion)
         # loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
 
 
