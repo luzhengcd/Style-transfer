@@ -4,6 +4,7 @@ import cv2
 from PIL import Image
 import torchvision.transforms as transforms
 import torch.nn.functional as F
+import glob
 
 def readData(path_lst):
 #     The path is where the pictures are, not a specific picture
@@ -100,5 +101,14 @@ def styleImg(path):
             img_new = transform_pipline(img)
             img_new = img_new.unsqueeze(0)
     return img_new
+
+
+def pair(pic_path, flow_path, occlusion_path):
+    pics = glob.glob(pic_path)
+    flows = glob.glob(flow_path)
+    occlusions = glob.glob(occlusion_path)
+    pairs = list(zip(pics, flows, occlusions))
+
+    return pairs
 
 

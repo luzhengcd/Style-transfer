@@ -1,7 +1,7 @@
 import scipy.misc as mic
 import time
 from lossCalculation import *
-
+import IO
 
 class AverageMeter(object):
 
@@ -48,7 +48,7 @@ def Gram(X):
     return gram_tensor
 
 
-def train(model, device, data_loader,
+def train(model, device, data_loader, occlusion_path, flow_path,
           optimizer, epoch, y_s, criterion, cWeight, sWeight, oWeight, current_epoch):
 
     batch_time = AverageMeter()
@@ -66,8 +66,26 @@ def train(model, device, data_loader,
 
     # pre = next(data_iterator)[1][0]
     # print(pre.shape)
-
+    flag = 0
     for i, input in data_iterator:
+
+
+        current_occlusion_path = occlusion_path[flag, flag+2]
+        current_flow_path = flow_path[flag]
+
+        flag = flag + 2
+        current_occlusion = np.array([IO.read(i) for i in current_occlusion_path])
+
+        # the shape of current occlusion should be ()
+        # but current batch shape is ()
+
+
+        '''
+        sudo code:
+            batch = current_occlusion * batch
+            
+        '''
+
 
         # this is the input frame!!!!
         # print('memory management: ', torch.cuda.memory_allocated(device))
@@ -95,7 +113,7 @@ def train(model, device, data_loader,
         # print('feature current shape', feature_current.shape)
         # should have the same order
 
-        loss_temporalO = oWeight * temporalF(current_input, flow_path, criterion)
+        loss_temporalO = oWeight * temporalF(current_input, current_flow_path, criterion)
         # loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
 
 
