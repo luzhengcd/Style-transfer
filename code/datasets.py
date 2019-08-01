@@ -8,10 +8,12 @@ import glob
 
 def readData(path_lst):
 #     The path is where the pictures are, not a specific picture
-    img_size = 256
+    H = 360
+    W = 640
+
     tensor_lst = []
 
-    transform_pipline = transforms.Compose([transforms.Resize([img_size, img_size]),
+    transform_pipline = transforms.Compose([transforms.Resize([H, W]),
                                             transforms.ToTensor()])
 
     for path in path_lst:
@@ -60,7 +62,7 @@ def readVideo(path):
 
             # count = count+1
             # print(count)
-            img_new = torch.Tensor( crop_array(img_height, img_width, frame) )
+            img_new = torch.Tensor(crop_array(img_height, img_width, frame) )
                       # / 255.0
             img_new = img_new.reshape(3, img_height, img_width)
 
@@ -101,6 +103,30 @@ def styleImg(path):
             img_new = transform_pipline(img)
             img_new = img_new.unsqueeze(0)
     return img_new
+
+
+
+def read_flow_occlusion(path):
+
+#     The path is where the pictures are, not a specific picture
+    img_size = 256
+
+
+    transform_pipline = transforms.Compose([transforms.Resize([img_size, img_size]),
+                                            ])
+    if path.endswith('.png'):
+
+        with open(path, 'r+b') as f:
+            with Image.open(f) as img:
+                res = transform_pipline(img)
+                # img_new = img_new.unsqueeze(0)
+    elif path.endswith('.flo'):
+
+        print()
+
+    else:
+        print('wrong flow or occlusion file')
+    return res
 
 
 def pair(pic_path, flow_path, occlusion_path):

@@ -1,4 +1,5 @@
 from lossNet import *
+# from utils import Gram, crop_array
 import utils
 import numpy as np
 import cv2
@@ -91,14 +92,47 @@ def reshape_batch(batch, batch_size):
 
 
 
+# def warp_flow(batch, flow_lst):
+#     # note that img here is also a batch, which contains 2 images with the format of (#frame, C, H, W)
+#     # after reshape, the shape of the batch becomes (#frame, H, W, C), and the shape of flow tensor is (#frame, H, W, grad)
+#
+#     batch_size = batch.shape[0]
+#     # batch size would be 2
+#     #
+#
+#     batch_reshape =reshape_batch(batch, batch_size)
+#     h, w = flow_lst[0].shape[:2]
+#
+#
+#     for i in range(batch_size):
+#         flow_lst[i][:, :, 0] += np.arange(h)[:, np.newaxis]
+#         flow_lst[i][:, :, 1] += np.arange(w)
+#
+#
+#     # cv2.remap(batch_reshape[0].data.numpy(), flow_lst[0], None, cv2.INTER_LINEAR)
+#
+#     warped_lst = [torch.Tensor(cv2.remap(batch_reshape[i].cpu().data.numpy(), flow_lst[i],
+#                         None, cv2.INTER_LINEAR)) for i in range(batch_size)]
+#
+#     warped = torch.stack(warped_lst)
+#     res = warped.reshape((batch_size, batch.shape[1], h, w))
+#
+#     return res
+
 
 def warp_flow(batch, flow_path):
     # note that img here is also a batch, which contains 2 images with the format of (#frame, C, H, W)
     # after reshape, the shape of the batch becomes (#frame, H, W, C), and the shape of flow tensor is (#frame, H, W, grad)
 
     # batch size would be 2
-    flow = IO.read(flow_path)
-    H, W = flow.shape[:2]
+
+    flow = IO.read(flow_path)[:, :, :2]
+    num_frame, C, H, W = batch.shape
+    flow = utils.crop_array(H, W, flow)
+    # H, W = flow.shape[:2]
+
+    # print(batch.shape)
+    # print(batch[1].shape)
 
     pic_after_arr = batch[1].data.cpu().numpy().reshape(H, W, 3)
 
@@ -108,18 +142,34 @@ def warp_flow(batch, flow_path):
     res = cv2.remap(pic_after_arr, flow, None, cv2.INTER_LINEAR)
 
     # back to the size of a normal batch
-    res_reshape = torch.Tensor(res.reshape((1, 3, H, W)))
+    # res_reshape = torch.Tensor(res.reshape((1, 3, H, W)))
 
-    return res_reshape
+    # return res_reshape
+    return res
 
 
-def temporalF(batch, flow_path, criterion):
+def temporalF(batch, flow_path, occlusion_path, criterion):
 
     pre = batch[0]
     warped = warp_flow(batch, flow_path)
+    num_frame, C, H, W = batch.shape
     # need to add mask later
-    warped = warped.to(device)
-    return criterion(pre, warped)
+    # occlusion = IO.read(occlusion_path)
+    # print(pre.shape)
+
+    # the shape of batch (#frame, C, H, W)
+
+    pre_reshape = np.array(pre.reshape((H, W, 3)))
+
+    mask = utils.crop_array(H, W, -(IO.read(occlusion_path) / 255 - 1)).reshape((H, W, 1))
+
+    masked_warp = torch.Tensor((mask * warped))
+    masked_pre = torch.Tensor((mask * pre_reshape))
+
+    pre_final = masked_pre.to(device)
+    warp_final = masked_warp.to(device)
+
+    return criterion(pre_final, warp_final)
 
 
 def temporalO(O_current, O_pre, criterion, flow):

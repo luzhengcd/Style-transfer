@@ -24,6 +24,15 @@ def imsave(path, img):
     img = np.clip(img, 0, 255).astype(np.uint8)
     mic.imsave(path, img)
 
+# find the cutoff of video
+def findCutoff(path_lst):
+    im_index = np.array([int(i[-11:-4]) for i in path_lst])
+    im_index_shift = np.roll(im_index, 1)
+
+    diff = im_index - im_index_shift
+    cutoff = [i for i in range(len(diff)) if diff[i] == 2]
+    cutoff.insert(0, 0)
+    return cutoff
 
 
 def Gram(X):
@@ -48,8 +57,20 @@ def Gram(X):
     return gram_tensor
 
 
+
+def crop_array(h, w, img_arr):
+
+    shape = img_arr.shape
+    height = shape[0]
+    width = shape[1]
+    each_h = int((height - h) / 2)
+    each_w = int((width - w) / 2)
+    return img_arr[each_h : height - each_h, each_w : width - each_w]
+
+
 def train(model, device, data_loader, occlusion_path, flow_path,
-          optimizer, epoch, y_s, criterion, cWeight, sWeight, oWeight, current_epoch):
+          optimizer, epoch, y_s, criterion, cWeight, sWeight,
+          oWeight, current_epoch):
 
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -66,15 +87,20 @@ def train(model, device, data_loader, occlusion_path, flow_path,
 
     # pre = next(data_iterator)[1][0]
     # print(pre.shape)
-    flag = 0
+    flow_occlusion_flag = 0
     for i, input in data_iterator:
 
+        current_flow_path = flow_path[flow_occlusion_flag]
+        current_occlusion_path = occlusion_path[flow_occlusion_flag]
 
-        current_occlusion_path = occlusion_path[flag, flag+2]
-        current_flow_path = flow_path[flag]
 
-        flag = flag + 2
-        current_occlusion = np.array([IO.read(i) for i in current_occlusion_path])
+        # print('Current occlusion: ', current_occlusion_path)
+        # print('Current flow: ', current_flow_path)
+
+
+        flow_occlusion_flag += 2
+
+        # current_occlusion = np.array([IO.read(i) for i in current_occlusion_path])
 
         # the shape of current occlusion should be ()
         # but current batch shape is ()
@@ -85,7 +111,6 @@ def train(model, device, data_loader, occlusion_path, flow_path,
             batch = current_occlusion * batch
             
         '''
-
 
         # this is the input frame!!!!
         # print('memory management: ', torch.cuda.memory_allocated(device))
@@ -112,12 +137,13 @@ def train(model, device, data_loader, occlusion_path, flow_path,
         # print('feature pre shape',feature_pre.shape)
         # print('feature current shape', feature_current.shape)
         # should have the same order
+        # def temporalF(batch, flow_path, occlusion_path, criterion):
 
-        loss_temporalO = oWeight * temporalF(current_input, current_flow_path, criterion)
+        loss_temporalF = oWeight * temporalF(current_input, current_flow_path, current_occlusion_path, criterion)
         # loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
 
 
-        loss = loss_content + loss_style  + loss_temporalO
+        loss = loss_content + loss_style  + loss_temporalF
         loss.to(device)
         loss.backward()
         optimizer.step()
@@ -128,7 +154,7 @@ def train(model, device, data_loader, occlusion_path, flow_path,
         losses.update(loss.item())
         loss_content_track.update(loss_content)
         loss_style_track.update(loss_style)
-        loss_temporal_track.update(loss_temporalO)
+        loss_temporal_track.update(loss_temporalF)
 
         print('Epoch: [{0}/{1}][{2}/{3}]\t'
               'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
