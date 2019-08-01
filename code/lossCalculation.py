@@ -51,8 +51,8 @@ def styleLoss(y_s, y_hat, criterion):
     output22_hat = relu22(y_hat)
     output33_ys = relu33(y_s)
     output33_hat = relu33(y_hat)
-    # output43_ys = relu43(y_s)
-    # output43_hat = relu43(y_hat)
+    output43_ys = relu43(y_s)
+    output43_hat = relu43(y_hat)
 
     #   calculate the gram matrix for each layer
     #   right now, we assume the outputs have a shape of [3,.., ..]
@@ -60,10 +60,9 @@ def styleLoss(y_s, y_hat, criterion):
     loss1 = criterion(utils.Gram(output12_hat), utils.Gram(output12_ys))
     loss2 = criterion(utils.Gram(output22_hat), utils.Gram(output22_ys))
     loss3 = criterion(utils.Gram(output33_hat), utils.Gram(output33_ys))
-    # loss4 = criterion(utils.Gram(output43_hat), utils.Gram(output43_ys))
+    loss4 = criterion(utils.Gram(output43_hat), utils.Gram(output43_ys))
 
-    total_style_loss = loss1 + loss2 + loss3
-                       # + loss4
+    total_style_loss = loss1 + loss2 + loss3 + loss4
     total_style_loss = total_style_loss
     return total_style_loss
 
@@ -82,7 +81,6 @@ def contentLoss(y_c, y_hat, criterion):
     yc_flatten = output22_yc.reshape(output22_yc.shape[0], -1)
 
     loss_content = criterion(hat_flatten, yc_flatten)
-
     return loss_content
 
 
@@ -129,10 +127,6 @@ def warp_flow(batch, flow_path):
     flow = IO.read(flow_path)[:, :, :2]
     num_frame, C, H, W = batch.shape
     flow = utils.crop_array(H, W, flow)
-    # H, W = flow.shape[:2]
-
-    # print(batch.shape)
-    # print(batch[1].shape)
 
     pic_after_arr = batch[1].data.cpu().numpy().reshape(H, W, 3)
 
@@ -155,11 +149,10 @@ def temporalF(batch, flow_path, occlusion_path, criterion):
     num_frame, C, H, W = batch.shape
     # need to add mask later
     # occlusion = IO.read(occlusion_path)
-    # print(pre.shape)
 
     # the shape of batch (#frame, C, H, W)
 
-    pre_reshape = np.array(pre.reshape((H, W, 3)))
+    pre_reshape = pre.reshape((H, W, 3)).cpu().numpy()
 
     mask = utils.crop_array(H, W, -(IO.read(occlusion_path) / 255 - 1)).reshape((H, W, 1))
 

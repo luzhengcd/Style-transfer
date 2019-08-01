@@ -6,9 +6,8 @@ from utils import *
 import torch.nn as nn
 from datasets import readData, styleImg, readVideo
 import glob
+import timing
 from utils import AverageMeter
-
-
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -28,21 +27,28 @@ torch.cuda.manual_seed(42)
 vgg16 = models.vgg16(pretrained=True)
 vgg16.to('cuda' if torch.cuda.is_available() else 'cpu')
 
-torch.manual_seed(0)
+
 if torch.cuda.is_available():
-    torch.cuda.manual_seed(0)
+    TRAIN_LST = glob.glob(r'../../data/FlyingThings3D_subset/val/image_clean/left/*')
+    PATH_FLOW = glob.glob(r'../../FlyingThings3D_subset/val/flow/left/into_past/*')
+    PATH_OCCLUSION = glob.glob(r'../../data/FlyingThings3D_subset/val/flow_occlusions/left/into_past/*')
+else:
+    TRAIN_LST = glob.glob(r'../data/flow_data/image_clean_left/*')
+    PATH_FLOW = glob.glob(r'../data/flow_data/flow_left/into_past/*')
+    PATH_OCCLUSION = glob.glob(r'../data/flow_data/flow_occlusions/left/into_past/*')
 
-
-PATH_TRAIN_FILE = r'../data/flow_data/image_clean_left/*'
 PATH_STYLE = r'../data/styleImg/'+ args.style +'.jpg'
-PATH_FLOW = glob.glob(r'../data/flow_data/flow_left/into_past/*')
-PATH_OCCLUSION = glob.glob(r'../data/flow_data/flow_occlusions/left/into_past/*')
-pic_path = glob.glob(PATH_TRAIN_FILE)
+# pic_path = glob.glob(PATH_TRAIN_FILE)
+
+TRAIN_LST.sort()
+PATH_FLOW.sort()
+PATH_OCCLUSION.sort()
+
 
 cutoff = findCutoff(PATH_FLOW)
 
-TRAIN_LST = glob.glob(PATH_TRAIN_FILE)
-
+# print(PATH_FLOW)
+# print(cutoff)
 # pic_path = pic_path[:args.trainSize]
 #
 # NUM_VIDEO = len(pic_path)
@@ -77,6 +83,9 @@ criterion.to(device)
 start = 0
 
 for i in range(1, len(cutoff)):
+
+    print('====== Video [{0}/424] ======'.format(i))
+
     torch.cuda.empty_cache()
 
     end = i
@@ -88,6 +97,9 @@ for i in range(1, len(cutoff)):
     flow_path = PATH_FLOW[cutoff[start] : cutoff[end]]
 
     temp_train_lst = TRAIN_LST[idx_img_start : idx_img_end]
+
+
+    start = i
     train_dataset = readData(temp_train_lst)
 
 

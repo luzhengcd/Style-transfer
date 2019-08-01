@@ -26,12 +26,16 @@ def imsave(path, img):
 
 # find the cutoff of video
 def findCutoff(path_lst):
-    im_index = np.array([int(i[-11:-4]) for i in path_lst])
-    im_index_shift = np.roll(im_index, 1)
 
+    im_index = np.array([int(i[-11:-4]) for i in path_lst])
+    # im_index.sort()
+
+    im_index_shift = np.roll(im_index, 1)
+    # print(im_index)
     diff = im_index - im_index_shift
-    cutoff = [i for i in range(len(diff)) if diff[i] == 2]
+    cutoff = [i for i in range(len(diff)) if diff[i] >= 2]
     cutoff.insert(0, 0)
+    # print(cutoff)
     return cutoff
 
 
@@ -88,36 +92,33 @@ def train(model, device, data_loader, occlusion_path, flow_path,
     # pre = next(data_iterator)[1][0]
     # print(pre.shape)
     flow_occlusion_flag = 0
+
+    flow_length = len(flow_path)
+
+    # print('length of flow: ', len(flow_path))
     for i, input in data_iterator:
+
+        if flow_occlusion_flag + 1 > flow_length:
+
+            continue
 
         current_flow_path = flow_path[flow_occlusion_flag]
         current_occlusion_path = occlusion_path[flow_occlusion_flag]
 
-
+        # print('FLAG: ', flow_occlusion_flag)
         # print('Current occlusion: ', current_occlusion_path)
         # print('Current flow: ', current_flow_path)
 
-
         flow_occlusion_flag += 2
 
-        # current_occlusion = np.array([IO.read(i) for i in current_occlusion_path])
-
-        # the shape of current occlusion should be ()
-        # but current batch shape is ()
-
-
-        '''
-        sudo code:
-            batch = current_occlusion * batch
-            
-        '''
-
         # this is the input frame!!!!
-        # print('memory management: ', torch.cuda.memory_allocated(device))
 
         data_time.update((time.time() - end))
-
         y_c = input[0]
+        num_frame = y_c.shape[0]
+
+        if num_frame==1:
+            continue
 
         current_input = y_c.to(device)
 
