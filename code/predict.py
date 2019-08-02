@@ -4,14 +4,10 @@ import transferNet
 import torchvision.transforms as transforms
 from PIL import Image
 import cv2
+import timing
 from torchvision.transforms.functional import normalize
 import argparse
 import skvideo.io as io
-
-parser = argparse.ArgumentParser()
-parser.add_argument('-fourcc', type = str, default='mp4v')
-
-args = parser.parse_args()
 
 def recover_image(img):
     return (
@@ -22,7 +18,6 @@ def recover_image(img):
         ).transpose(0, 2, 3, 1) *
         255.
     ).clip(0, 255).astype(np.uint8)
-
 
 
 def imread(path):
@@ -59,9 +54,10 @@ def predict_pic(model_path, img_path):
     # Image.fromarray(new_out)
 
 
-def predict_video():
+def predict_video(num_frame, device, outpath):
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device(device)
     model_parameters = torch.load('../model/new_video_vangogh1.pth')
     path = '../../2019_NCL_Brand_Essence_Good_to_be_Free.mp4'
     model = transferNet.TransferNet()
@@ -78,12 +74,14 @@ def predict_video():
     frame_lst = []
     count = 0
     while (True):
+
+        torch.cuda.empty_cache()
+
         ret, frame = cap.read()
         count = count + 1
 
         print(count)
-        # print(ret)
-        if ret and count <= 30:
+        if ret and count <= num_frame:
 
             current_frame = torch.Tensor(frame.transpose(2, 0, 1)) / 255.
             normalized = normalize(current_frame, mean, std)
@@ -93,20 +91,25 @@ def predict_video():
             out = model(new_frame)
             new_out = recover_image(out[1].data.cpu().numpy())
             # out_writer.write(new_out)
-            new_out = new_out.reshape((1, *new_out.shape))
+            # new_out = new_out.reshape((1, *new_out.shape))
             frame_lst.append(new_out)
         else:
             break
     cap.release()
-    out_writer.release()
+    # out_writer.release()
     cv2.destroyAllWindows()
-
-
     out_video = np.concatenate(frame_lst)
-    # print(out_video.shape)
-    io.vwrite("../outputImage/new_video_vangogh1.mp4", out_video, outputdict={'-pix_fmt':'yuv420p'})
+    io.vwrite("../outputImage/" + outpath + ".mp4", out_video, outputdict={'-pix_fmt':'yuv420p'})
 
 
 if __name__ == '__main__':
 
-    predict_video()
+    parser = argparse.ArgumentParser()
+    # parser.add_argument('-fourcc', type = str, default='mp4v')
+    parser.add_argument('-numframe', type = int, default = 30)
+    parser.add_argument('-device', type = str, default = 'cpu')
+    parser.add_argument('-outpath', type = str, default = 'video')
+    args = parser.parse_args()
+
+
+    predict_video(args.numframe, args.device, args.outpath)
