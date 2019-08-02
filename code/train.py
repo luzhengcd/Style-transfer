@@ -12,7 +12,7 @@ from utils import AverageMeter
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-outpath', type = str, default='modelVideo1')
+parser.add_argument('-modelIdx', type = int, default=0)
 parser.add_argument('-style', type = str, default= 'style_vangogh')
 parser.add_argument('-cWeight', type = float, default = 8)
 parser.add_argument('-sWeight', type = float, default= 500000)
@@ -156,7 +156,7 @@ for i in range(1, len(cutoff)):
     # print( '===========[{0}/{1}]============\t'
     #        .format(i, NUM_VIDEO))
 
-torch.save(model.state_dict(), '../model/' + args.outpath + '.pth')
+torch.save(model.state_dict(), '../model/new_video_vangogh' + str(args.modelIdx) + '.pth')
 
 
 print('===== Finished =====')

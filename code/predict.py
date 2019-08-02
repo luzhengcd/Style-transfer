@@ -54,7 +54,7 @@ def predict_pic(model_path, img_path):
     # Image.fromarray(new_out)
 
 
-def predict_video(num_frame, device, outpath):
+def predict_video(num_frame, device, video_idx):
 
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     device = torch.device(device)
@@ -99,7 +99,7 @@ def predict_video(num_frame, device, outpath):
     # out_writer.release()
     cv2.destroyAllWindows()
     out_video = np.concatenate(frame_lst)
-    io.vwrite("../outputImage/" + outpath + ".mp4", out_video, outputdict={'-pix_fmt':'yuv420p'})
+    io.vwrite("../outputImage/new_video_vangogh" + str(video_idx) + ".mp4", out_video, outputdict={'-pix_fmt':'yuv420p'})
 
 
 if __name__ == '__main__':
@@ -108,8 +108,8 @@ if __name__ == '__main__':
     # parser.add_argument('-fourcc', type = str, default='mp4v')
     parser.add_argument('-numframe', type = int, default = 30)
     parser.add_argument('-device', type = str, default = 'cpu')
-    parser.add_argument('-outpath', type = str, default = 'video')
+    parser.add_argument('-video_idx', type = int, default = '0')
     args = parser.parse_args()
 
 
-    predict_video(args.numframe, args.device, args.outpath)
+    predict_video(args.numframe, args.device, args.video_idx)
