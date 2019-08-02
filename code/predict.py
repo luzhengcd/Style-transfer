@@ -6,6 +6,7 @@ from PIL import Image
 import cv2
 from torchvision.transforms.functional import normalize
 import argparse
+import skvideo.io as io
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-fourcc', type = str, default='mp4v')
@@ -59,39 +60,41 @@ def predict_pic(model_path, img_path):
 
 
 def predict_video():
+
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model_parameters = torch.load('../model/model_vangogh4.pth', )
-    path = '../data/video/2019_NCL_Brand_Essence_Good_to_be_Free.mp4'
+    model_parameters = torch.load('../model/new_video_vangogh1.pth')
+    path = '../../2019_NCL_Brand_Essence_Good_to_be_Free.mp4'
     model = transferNet.TransferNet()
     model.load_state_dict(model_parameters)
 
     model.to(device)
     cap = cv2.VideoCapture(path)
-    fourcc = cv2.VideoWriter_fourcc(*args.fourcc)
-    out_writer = cv2.VideoWriter("../outputImage/outputvideo_new.avi",
-                          fourcc, 24.0, (640, 480))
+    # fourcc = cv2.VideoWriter_fourcc(*args.fourcc)
+    # out_writer = cv2.VideoWriter("../outputImage/outputvideo_new.avi",
+    #                       fourcc, 24.0, (640, 480))
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
 
-    # frame_lst = []
+    frame_lst = []
     count = 0
-
     while (True):
         ret, frame = cap.read()
         count = count + 1
-        print(count)
 
+        print(count)
+        # print(ret)
         if ret and count <= 30:
+
             current_frame = torch.Tensor(frame.transpose(2, 0, 1)) / 255.
             normalized = normalize(current_frame, mean, std)
             torch.cuda.empty_cache()
             new_frame = normalized.reshape((1, *normalized.shape)).to(device)
 
             out = model(new_frame)
-            new_out = recover_image(out.data.cpu().numpy())[0]
-            out_writer.write(new_out)
-            # new_out = new_out.reshape((1, *new_out.shape))
-            # frame_lst.append(new_out)
+            new_out = recover_image(out[1].data.cpu().numpy())
+            # out_writer.write(new_out)
+            new_out = new_out.reshape((1, *new_out.shape))
+            frame_lst.append(new_out)
         else:
             break
     cap.release()
@@ -99,9 +102,9 @@ def predict_video():
     cv2.destroyAllWindows()
 
 
-    # out_video = np.concatenate(frame_lst)
+    out_video = np.concatenate(frame_lst)
     # print(out_video.shape)
-    # io.vwrite("../outputImage/outputvideo_new.mp4", out_video, outputdict={'-pix_fmt':'yuv420p'})
+    io.vwrite("../outputImage/new_video_vangogh1.mp4", out_video, outputdict={'-pix_fmt':'yuv420p'})
 
 
 if __name__ == '__main__':
