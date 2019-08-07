@@ -73,8 +73,8 @@ def crop_array(h, w, img_arr):
 
 
 def train(model, device, data_loader, occlusion_path, flow_path,
-          optimizer, epoch, y_s, criterion, cWeight, sWeight,
-          oWeight, current_epoch):
+          optimizer, y_s, criterion, cWeight, sWeight,
+          oWeight):
 
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -142,7 +142,9 @@ def train(model, device, data_loader, occlusion_path, flow_path,
 
         loss_temporalF = oWeight * temporalF(current_input, current_flow_path, current_occlusion_path, criterion)
         # loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
+        if loss_temporalF == 0:
 
+            continue
 
         loss = loss_content + loss_style  + loss_temporalF
         loss.to(device)
@@ -157,14 +159,14 @@ def train(model, device, data_loader, occlusion_path, flow_path,
         loss_style_track.update(loss_style)
         loss_temporal_track.update(loss_temporalF)
 
-        print('Epoch: [{0}/{1}][{2}/{3}]\t'
+        print('Epoch: [{0}/{1}]\t'
               'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
               'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
               'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
               'Content loss {closs.val:.4f} ({closs.avg:.4f})\t'
               'Style loss {sloss.val:.4f} ({sloss.avg:.4f})\t'
               'Temporal loss {oloss.val:.4f} ({oloss.avg:.4f})'
-              .format(current_epoch+1, epoch, i, len(data_loader), batch_time=batch_time, data_time=data_time, loss=losses,
+              .format(i, len(data_loader), batch_time=batch_time, data_time=data_time, loss=losses,
                       closs = loss_content_track, sloss = loss_style_track, oloss = loss_temporal_track))
 
     return losses.avg

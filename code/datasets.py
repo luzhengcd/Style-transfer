@@ -62,15 +62,15 @@ def readVideo(path):
 
             # count = count+1
             # print(count)
-            img_new = torch.Tensor(crop_array(img_height, img_width, frame) )
+            frame = torch.Tensor(crop_array(img_height, img_width, frame) )
                       # / 255.0
-            img_new = img_new.reshape(3, img_height, img_width)
+            frame = frame.reshape(3, img_height, img_width)
 
             # img_new = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])(img_new)
             # img_new = img_new.unsqueeze(0)
             # img_reflection = F.pad(img_new, pad=(40, 40, 40, 40), mode='reflect')
             # img_reflection = img_reflection.reshape(img_reflection.shape[1:])
-            tensor_lst.append(img_new)
+            tensor_lst.append(frame)
         else:
             break
 
@@ -84,16 +84,17 @@ def readVideo(path):
 
     dataset = TensorDataset(stacked_tensor)
 
+    stacked_tensor = None
     return dataset
 
 
 def styleImg(path):
 
 #     The path is where the pictures are, not a specific picture
-    img_size = 256
+    H = 360
+    W = 640
 
-
-    transform_pipline = transforms.Compose([transforms.Resize([img_size, img_size]),
+    transform_pipline = transforms.Compose([transforms.Resize([H, W]),
                                             transforms.ToTensor(),
                                             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                                                  std=[0.229, 0.224, 0.225])
@@ -105,36 +106,5 @@ def styleImg(path):
     return img_new
 
 
-
-def read_flow_occlusion(path):
-
-#     The path is where the pictures are, not a specific picture
-    img_size = 256
-
-
-    transform_pipline = transforms.Compose([transforms.Resize([img_size, img_size]),
-                                            ])
-    if path.endswith('.png'):
-
-        with open(path, 'r+b') as f:
-            with Image.open(f) as img:
-                res = transform_pipline(img)
-                # img_new = img_new.unsqueeze(0)
-    elif path.endswith('.flo'):
-
-        print()
-
-    else:
-        print('wrong flow or occlusion file')
-    return res
-
-
-def pair(pic_path, flow_path, occlusion_path):
-    pics = glob.glob(pic_path)
-    flows = glob.glob(flow_path)
-    occlusions = glob.glob(occlusion_path)
-    pairs = list(zip(pics, flows, occlusions))
-
-    return pairs
 
 

@@ -123,7 +123,6 @@ def warp_flow(batch, flow_path):
     # after reshape, the shape of the batch becomes (#frame, H, W, C), and the shape of flow tensor is (#frame, H, W, grad)
 
     # batch size would be 2
-    print(flow_path)
     flow = IO.read(flow_path)[:, :, :2]
     num_frame, C, H, W = batch.shape
     flow = utils.crop_array(H, W, flow)
@@ -135,17 +134,31 @@ def warp_flow(batch, flow_path):
 
     res = cv2.remap(pic_after_arr, flow, None, cv2.INTER_LINEAR)
 
+    return res
+
+
+
     # back to the size of a normal batch
     # res_reshape = torch.Tensor(res.reshape((1, 3, H, W)))
 
     # return res_reshape
-    return res
+    # return res
 
 
 def temporalF(batch, flow_path, occlusion_path, criterion):
 
     pre = batch[0]
+
+    # f = open(flow_path, 'rb')
+
+    # header = f.read(4)
+    # if header.decode("utf-8") != 'PIEH':
+    #     print('Flow file header does not contain PIEH')
+    #     return 0
+    # else:
+
     warped = warp_flow(batch, flow_path)
+
     num_frame, C, H, W = batch.shape
     # need to add mask later
     # occlusion = IO.read(occlusion_path)
