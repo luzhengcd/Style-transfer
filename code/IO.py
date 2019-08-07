@@ -103,6 +103,7 @@ def readFlow(name):
     f = open(name, 'rb')
 
     header = f.read(4)
+    print(header.decode('utf-8'))
     if header.decode("utf-8") != 'PIEH':
         raise Exception('Flow file header does not contain PIEH')
 

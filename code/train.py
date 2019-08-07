@@ -16,7 +16,7 @@ parser.add_argument('-modelIdx', type = int, default=0)
 parser.add_argument('-style', type = str, default= 'style_vangogh')
 parser.add_argument('-cWeight', type = float, default = 8)
 parser.add_argument('-sWeight', type = float, default= 500000)
-parser.add_argument('-trainSize', type = int, default=20)
+parser.add_argument('-trainset', type = str, default='val')
 parser.add_argument('-oWeight', type = float, default = 100)
 # parser.add_argument('-fWeight', type = float, default=1000)
 args = parser.parse_args()
@@ -29,9 +29,9 @@ vgg16.to('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 if torch.cuda.is_available():
-    TRAIN_LST = glob.glob(r'../../data/FlyingThings3D_subset/val/image_clean/left/*')
-    PATH_FLOW = glob.glob(r'../../FlyingThings3D_subset/val/flow/left/into_past/*')
-    PATH_OCCLUSION = glob.glob(r'../../data/FlyingThings3D_subset/val/flow_occlusions/left/into_past/*')
+    TRAIN_LST = glob.glob(r'../../data/FlyingThings3D_subset/' + args.trainset + '/image_clean/left/*')
+    PATH_FLOW = glob.glob(r'../../FlyingThings3D_subset/' + args.trainset + '/flow/left/into_past/*')
+    PATH_OCCLUSION = glob.glob(r'../../data/FlyingThings3D_subset/' + args.trainset + '/flow_occlusions/left/into_past/*')
 else:
     TRAIN_LST = glob.glob(r'../data/flow_data/image_clean_left/*')
     PATH_FLOW = glob.glob(r'../data/flow_data/flow_left/into_past/*')

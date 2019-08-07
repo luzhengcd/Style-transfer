@@ -35,8 +35,6 @@ def imread(path):
     return img_new
 
 
-
-
 def predict_pic(model_path, img_path):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model_parameters = torch.load(model_path, map_location= device)
@@ -58,7 +56,7 @@ def predict_video(num_frame, device, video_idx):
 
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     device = torch.device(device)
-    model_parameters = torch.load('../model/new_video_vangogh1.pth')
+    model_parameters = torch.load('../model/new_video_vangogh' + str(video_idx)+'.pth')
     path = '../../2019_NCL_Brand_Essence_Good_to_be_Free.mp4'
     model = transferNet.TransferNet()
     model.load_state_dict(model_parameters)
@@ -109,6 +107,7 @@ if __name__ == '__main__':
     parser.add_argument('-numframe', type = int, default = 30)
     parser.add_argument('-device', type = str, default = 'cpu')
     parser.add_argument('-video_idx', type = int, default = '0')
+
     args = parser.parse_args()
 
 

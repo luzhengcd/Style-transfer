@@ -9,7 +9,7 @@ import IO
 To calculate the loss, the following steps need to be implemented:
     - Perform a forward pass with transferNet. The output of the transferNet
     will be the input of lossNet
-    - Get the output of specified layers of lossNet. 
+    - Get the output of specified layers of lossNet.
     - Calculate the style loss and the content loss.
     - Perform the optimization
 """
@@ -123,7 +123,7 @@ def warp_flow(batch, flow_path):
     # after reshape, the shape of the batch becomes (#frame, H, W, C), and the shape of flow tensor is (#frame, H, W, grad)
 
     # batch size would be 2
-
+    print(flow_path)
     flow = IO.read(flow_path)[:, :, :2]
     num_frame, C, H, W = batch.shape
     flow = utils.crop_array(H, W, flow)
