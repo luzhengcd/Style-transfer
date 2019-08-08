@@ -143,7 +143,6 @@ def train(model, device, data_loader, occlusion_path, flow_path,
         loss_temporalF = oWeight * temporalF(current_input, current_flow_path, current_occlusion_path, criterion)
         # loss_temporalF = temporalF(feature_current, feature_pre, flow, criterion)
         if loss_temporalF == 0:
-
             continue
 
         loss = loss_content + loss_style  + loss_temporalF
@@ -166,7 +165,7 @@ def train(model, device, data_loader, occlusion_path, flow_path,
               'Content loss {closs.val:.4f} ({closs.avg:.4f})\t'
               'Style loss {sloss.val:.4f} ({sloss.avg:.4f})\t'
               'Temporal loss {oloss.val:.4f} ({oloss.avg:.4f})'
-              .format(i, len(data_loader), batch_time=batch_time, data_time=data_time, loss=losses,
+              .format(i + 1, len(data_loader), batch_time=batch_time, data_time=data_time, loss=losses,
                       closs = loss_content_track, sloss = loss_style_track, oloss = loss_temporal_track))
 
     return losses.avg

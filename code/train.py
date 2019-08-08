@@ -6,6 +6,7 @@ from utils import *
 import torch.nn as nn
 from datasets import readData, styleImg, readVideo
 import glob
+import IO
 import timing
 from utils import AverageMeter
 import time
@@ -19,6 +20,8 @@ parser.add_argument('-cWeight', type = float, default = 8)
 parser.add_argument('-sWeight', type = float, default= 500000)
 parser.add_argument('-trainset', type = str, default='val')
 parser.add_argument('-oWeight', type = float, default = 100)
+parser.add_argument('-testIdx', type = int, default = 0)
+
 # parser.add_argument('-fWeight', type = float, default=1000)
 args = parser.parse_args()
 
@@ -45,23 +48,26 @@ PATH_STYLE = r'../data/styleImg/'+ args.style +'.jpg'
 # total flow count = 18711
 
 # Remove empty flows
+
 PATH_FLOW_EMPTY = []
+
 for i in PATH_FLOW:
-
-    f = open(i, 'rb')
-    header = f.read(4)
-
-    if header.decode("utf-8") != 'PIEH':
+    try:
+        IO.read(i)
+    except:
         PATH_FLOW_EMPTY.append(i)
 
-PATH_FLOW_VALID = list(set(PATH_FLOW) - set(PATH_FLOW_EMPTY))
 
+PATH_FLOW_VALID = list(set(PATH_FLOW) - set(PATH_FLOW_EMPTY))
+print('==== Total number of valid flow ' + str(len(PATH_FLOW_VALID)))
 TRAIN_LST.sort()
 PATH_FLOW_VALID.sort()
 PATH_OCCLUSION.sort()
 # time.sleep(180)
 
 cutoff = findCutoff(PATH_FLOW_VALID)
+
+cutoff = cutoff[args.testIdx:]
 
 # print(PATH_FLOW)
 # print(cutoff)
@@ -76,7 +82,7 @@ cutoff = findCutoff(PATH_FLOW_VALID)
 # VAL_lst = np.random.choice(pic_path, val_size)
 # TRAIN_lst = list(set(pic_path) - set(VAL_lst))
 
-
+# error occurs when 1042
 NUM_EPOCHS = 1
 BATCH_SIZE = 2
 USE_CUDA = True

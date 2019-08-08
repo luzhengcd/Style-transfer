@@ -27,6 +27,7 @@ PATH_OCCLUSION.sort()
 total_count = 0
 error_count = 0
 
+
 for i in PATH_FLOW:
     total_count += 1
 

@@ -156,7 +156,7 @@ def temporalF(batch, flow_path, occlusion_path, criterion):
     #     print('Flow file header does not contain PIEH')
     #     return 0
     # else:
-
+    # try:
     warped = warp_flow(batch, flow_path)
 
     num_frame, C, H, W = batch.shape
@@ -176,7 +176,9 @@ def temporalF(batch, flow_path, occlusion_path, criterion):
     warp_final = masked_warp.to(device)
 
     return criterion(pre_final, warp_final)
-
+    # except Exception as e:
+    #     print(e)
+    #     return 0
 
 def temporalO(O_current, O_pre, criterion, flow):
 

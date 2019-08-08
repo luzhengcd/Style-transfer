@@ -113,6 +113,10 @@ def readFlow(name):
         width = np.fromfile(f, np.int32, 1).squeeze()
         height = np.fromfile(f, np.int32, 1).squeeze()
 
+        # print(width, height)
+
+        # print(np.fromfile(f, np.float32, width * height * 2).shape)
+
         flow = np.fromfile(f, np.float32, width * height * 2).reshape((height, width, 2))
 
         return flow.astype(np.float32)
