@@ -21,7 +21,7 @@ parser.add_argument('-sWeight', type = float, default= 500000)
 parser.add_argument('-trainset', type = str, default='val')
 parser.add_argument('-oWeight', type = float, default = 100)
 parser.add_argument('-testIdx', type = int, default = 0)
-
+# parser.add_argument('-trainsize', type = int, default=0)
 # parser.add_argument('-fWeight', type = float, default=1000)
 args = parser.parse_args()
 
@@ -65,6 +65,8 @@ PATH_FLOW_VALID.sort()
 PATH_OCCLUSION.sort()
 # time.sleep(180)
 
+# PATH_FLOW_VALID = PATH_FLOW_VALID[args.trainsize:]
+
 cutoff = findCutoff(PATH_FLOW_VALID)
 
 cutoff = cutoff[args.testIdx:]
@@ -83,7 +85,7 @@ cutoff = cutoff[args.testIdx:]
 # TRAIN_lst = list(set(pic_path) - set(VAL_lst))
 
 # error occurs when 1042
-NUM_EPOCHS = 1
+NUM_EPOCHS = 2
 BATCH_SIZE = 2
 USE_CUDA = True
 NUM_WORKERS = 0
@@ -102,94 +104,93 @@ criterion.to(device)
 
 # num_pic_each = 1000
 # print('memory management: ', torch.cuda.memory_allocated(device))
-start = 0
 
 num_video = len(cutoff)
+
+start = 0
 
 restart = True
 count = 1
 
-while restart:
+# while restart:
 
-    if count == 2:
+    # start = 0
+#
+#     if count == 2:
 
-        restart = False
+#         restart = False
 
-    for i in range(1, num_video):
+for i in range(1, num_video):
 
-        print('====== Video [{0}/{1}] Iteration {2} ======'.format(i, num_video, count))
+    print('====== Video [{0}/{1}] Iteration {2} ======'.format(i, num_video, count))
 
-        torch.cuda.empty_cache()
+    torch.cuda.empty_cache()
 
-        end = i
+    end = i
 
-        idx_img_start = int(PATH_FLOW_VALID[cutoff[start]][-11 : -4]) - 1
-        idx_img_end = int(PATH_FLOW_VALID[cutoff[end] - 1][-11 : -4]) + 1
+    idx_img_start = int(PATH_FLOW_VALID[cutoff[start]][-11 : -4]) - 1
+    idx_img_end = int(PATH_FLOW_VALID[cutoff[end] - 1][-11 : -4]) + 1
 
-        occlussion_path = PATH_OCCLUSION[cutoff[start]:cutoff[end]]
+    occlussion_path = PATH_OCCLUSION[cutoff[start]:cutoff[end]]
 
-        flow_path = PATH_FLOW_VALID[cutoff[start] : cutoff[end]]
+    flow_path = PATH_FLOW_VALID[cutoff[start] : cutoff[end]]
 
-        temp_train_lst = TRAIN_LST[idx_img_start : idx_img_end]
+    temp_train_lst = TRAIN_LST[idx_img_start : idx_img_end]
 
-
-        start = i
-        train_dataset = readData(temp_train_lst)
-
-
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE,
-                                               shuffle=False, num_workers=NUM_WORKERS)
-        # train_losses = []
-        # best_val_loss = 0.0
+    start = i
+    train_dataset = readData(temp_train_lst)
 
 
-        # print(temp_train_lst)
-        # print(occlussion_path)
-        # print(flow_path)
-
-        # for epoch in range(NUM_EPOCHS):
-        #     print(epoch)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE,
+                                           shuffle=False, num_workers=NUM_WORKERS)
+    # train_losses = []
+    # best_val_loss = 0.0
 
 
-            # def train(model, device, data_loader, occlusion_path, flow_path,
-            #           optimizer, epoch, y_s, criterion, cWeight, sWeight,
-            #           oWeight, current_epoch):
+    # print(temp_train_lst)
+    # print(occlussion_path)
+    # print(flow_path)
+
+    for epoch in range(NUM_EPOCHS):
+
+        print(epoch)
+
 
         train_loss = train(model, device, train_loader, occlussion_path, flow_path,
-                           optimizer, y_s, criterion, args.cWeight, args.sWeight, args.oWeight)
-        #
-        # losses = AverageMeter()
-        # loss_content_track = AverageMeter()
-        # loss_style_track = AverageMeter()
-        # loss_temporal_track = AverageMeter()
+                           optimizer, y_s, criterion, args.cWeight, args.sWeight, args.oWeight, epoch, NUM_EPOCHS)
+    #
+    # losses = AverageMeter()
+    # loss_content_track = AverageMeter()
+    # loss_style_track = AverageMeter()
+    # loss_temporal_track = AverageMeter()
 
-        # model.eval()
-        # for p in range(val_size):
-        #     torch.cuda.empty_cache()
-        #
-        #     # change name to train dataset and train loader to avoid the memory error
-        #     val_dataset = readVideo(VAL_lst[p])
-        #
-        #     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=BATCH_SIZE,
-        #                                    shuffle=False, num_workers=NUM_WORKERS)
-        #
-        #     loss_avg, sLoss_avg, cLoss_avg, tLoss_avg = evaluate(model, device, val_loader, criterion,
-        #                                                          args.sWeight, args.cWeight, y_s, args.oWeight)
-        #
-        # loss_temporal_track.update(tLoss_avg)
-        # loss_content_track.update(cLoss_avg)
-        # loss_style_track.update(sLoss_avg)
-        # losses.update(loss_avg)
+    # model.eval()
+    # for p in range(val_size):
+    #     torch.cuda.empty_cache()
+    #
+    #     # change name to train dataset and train loader to avoid the memory error
+    #     val_dataset = readVideo(VAL_lst[p])
+    #
+    #     val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=BATCH_SIZE,
+    #                                    shuffle=False, num_workers=NUM_WORKERS)
+    #
+    #     loss_avg, sLoss_avg, cLoss_avg, tLoss_avg = evaluate(model, device, val_loader, criterion,
+    #                                                          args.sWeight, args.cWeight, y_s, args.oWeight)
+    #
+    # loss_temporal_track.update(tLoss_avg)
+    # loss_content_track.update(cLoss_avg)
+    # loss_style_track.update(sLoss_avg)
+    # losses.update(loss_avg)
 
-        # is_best = losses.avg < best_val_loss
+    # is_best = losses.avg < best_val_loss
 
-        # if is_best:
-        #     torch.save(model.state_dict(), '../model/' + args.outpath + '.pth')
+    # if is_best:
+    #     torch.save(model.state_dict(), '../model/' + args.outpath + '.pth')
 
-        # print( '===========[{0}/{1}]============\t'
-        #        .format(i, NUM_VIDEO))
+    # print( '===========[{0}/{1}]============\t'
+    #        .format(i, NUM_VIDEO))
 
-    count += 1
+# count += 1
 
 
 
